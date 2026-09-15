@@ -96,6 +96,12 @@ function WordCloudItem({
         </group>
       )}
 
+      {/* Contrast Halo Backdrop Mesh to isolate text from background starfield */}
+      <mesh position={[0, 0, -0.025]}>
+        <planeGeometry args={[pillWidth + 0.35, 0.42]} />
+        <meshBasicMaterial color="#02040a" transparent opacity={0.7} depthTest={false} />
+      </mesh>
+
       {/* 3D Glass Pill Backdrop Container Mesh */}
       <mesh position={[0, 0, -0.015]}>
         <planeGeometry args={[pillWidth, 0.22]} />
@@ -104,7 +110,7 @@ function WordCloudItem({
           roughness={0.2}
           metalness={0.92}
           transparent
-          opacity={isLastSubmitted ? 0.95 : isHighlighted ? 0.95 : 0.84}
+          opacity={isLastSubmitted ? 0.95 : isHighlighted ? 0.95 : 0.88}
           depthTest={false}
         />
       </mesh>
@@ -155,26 +161,58 @@ export function OrbitingWords3D({
   lastSubmittedWordId,
 }: OrbitingWords3DProps) {
   const orbitGroupRef = useRef<THREE.Group>(null);
+  const starFarRef = useRef<THREE.Group>(null);
+  const starMidRef = useRef<THREE.Group>(null);
+  const starNearRef = useRef<THREE.Group>(null);
+  const [scaleFactor, setScaleFactor] = useState(0.01);
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
     const t = state.clock.getElapsedTime();
 
+    // Smooth staggered scale intro on load
+    if (scaleFactor < 1) {
+      setScaleFactor((prev) => Math.min(1, prev + delta * 1.8));
+    }
+
     if (orbitGroupRef.current) {
-      // Gentle, serene 360 orbital rotation + subtle mouse parallax for maximum readability
       orbitGroupRef.current.rotation.y = t * 0.035 + state.pointer.x * 0.08;
       orbitGroupRef.current.rotation.x = Math.sin(t * 0.03) * 0.05 - state.pointer.y * 0.06;
+    }
+
+    // Differential Parallax Starfield Rotations
+    if (starFarRef.current) {
+      starFarRef.current.rotation.y = -t * 0.012;
+      starFarRef.current.rotation.z = Math.sin(t * 0.01) * 0.05;
+    }
+    if (starMidRef.current) {
+      starMidRef.current.rotation.y = t * 0.028;
+    }
+    if (starNearRef.current) {
+      starNearRef.current.rotation.y = -t * 0.055;
+      starNearRef.current.rotation.x = Math.cos(t * 0.02) * 0.04;
     }
   });
 
   return (
-    <group>
-      {/* Central Metallic Extruded "52" Emblem Core for Maximum Legibility */}
+    <group scale={scaleFactor}>
+      {/* Central Metallic Extruded "52" Emblem Core */}
       <Metallic52Core />
 
-      {/* Swatch Particle Star Field matching Blue, Emerald Green and Silver Swatches */}
-      <Sparkles count={220} scale={16} size={3.5} speed={0.25} opacity={0.8} color="#38bdf8" />
-      <Sparkles count={150} scale={14} size={3} speed={0.2} opacity={0.85} color="#52b788" />
-      <Sparkles count={80} scale={12} size={4} speed={0.15} opacity={0.9} color="#ffffff" />
+      {/* 1. Deep Background Starfield Layer (Slow Cyan Orbit) */}
+      <group ref={starFarRef}>
+        <Sparkles count={260} scale={24} size={4.0} speed={0.15} opacity={0.7} color="#38bdf8" />
+      </group>
+
+      {/* 2. Midground Starfield Layer (Medium Emerald Green Orbit) */}
+      <group ref={starMidRef}>
+        <Sparkles count={180} scale={18} size={3.2} speed={0.25} opacity={0.8} color="#52b788" />
+      </group>
+
+      {/* 3. Foreground Dust Starfield Layer (Fast Gold & White Dust) */}
+      <group ref={starNearRef}>
+        <Sparkles count={100} scale={12} size={2.5} speed={0.35} opacity={0.9} color="#fbbf24" />
+        <Sparkles count={60} scale={10} size={2.0} speed={0.4} opacity={0.85} color="#ffffff" />
+      </group>
 
       {/* Orbiting 3D Historical Word Constellation */}
       <group ref={orbitGroupRef}>

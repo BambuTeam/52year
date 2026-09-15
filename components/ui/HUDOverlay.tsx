@@ -21,13 +21,23 @@ export function HUDOverlay({
   onOpenShareModal,
   onResetSelection,
 }: HUDOverlayProps) {
+  const [isLoadingAdd, setIsLoadingAdd] = React.useState(false);
+
+  const handleOpenAdd = () => {
+    setIsLoadingAdd(true);
+    setTimeout(() => {
+      setIsLoadingAdd(false);
+      onOpenAddModal();
+    }, 250);
+  };
+
   return (
     <div className="absolute inset-0 pointer-events-none z-30 flex flex-col justify-between p-3 sm:p-6 md:p-8 selection:bg-none">
 
       {/* Top Bar: Brand & Stats */}
       <div className="flex items-center justify-between w-full gap-2">
         {/* Top-Left: Official Logo Floating Pill */}
-        <div className="pointer-events-auto flex items-center gap-2.5 sm:gap-3.5 backdrop-blur-2xl bg-slate-950/90 border border-slate-800/90 hover:border-blue-500/50 rounded-full px-3.5 py-2 sm:px-5 sm:py-2.5 shadow-2xl shadow-blue-950/60 transition-all hover:scale-105 group">
+        <div className="pointer-events-auto relative flex items-center gap-2.5 sm:gap-3.5 backdrop-blur-2xl bg-slate-950/90 border border-slate-800/90 hover:border-blue-500/50 rounded-full px-3.5 py-2 sm:px-5 sm:py-2.5 shadow-2xl shadow-blue-950/60 transition-all hover:scale-105 group overflow-hidden">
           <img
             src="/l_oficial.svg"
             alt="Grupo Tritech Logo Oficial"
@@ -35,7 +45,7 @@ export function HUDOverlay({
           />
           <div className="h-4 sm:h-5 w-px bg-slate-800/90 hidden xs:block" />
           <div className="hidden xs:flex flex-col">
-            <span className="text-white font-extrabold tracking-widest text-[8px] sm:text-[10px] uppercase flex items-center gap-1.5">
+            <span className="text-white font-extrabold tracking-widest text-[8px] sm:text-[10px] uppercase flex items-center gap-1.5 font-sans">
               52 AÑOS DE HISTORIA
               <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
             </span>
@@ -50,21 +60,25 @@ export function HUDOverlay({
           <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 animate-spin" style={{ animationDuration: "10s" }} />
           <span className="text-[10px] sm:text-xs font-mono text-slate-300">
             <span className="hidden xs:inline">CONCEPTOS 3D:</span>
-            <strong className="text-amber-400 text-xs sm:text-sm ml-1 font-bold">{wordCount}</strong>
+            <strong className="text-amber-400 text-xs sm:text-sm ml-1 font-mono font-extrabold">{wordCount}</strong>
           </span>
         </div>
       </div>
 
       {/* Selected Word Active Detail Floating Card (with Official History Note) */}
       {selectedWord && (
-        <div className="pointer-events-auto self-center bg-slate-950/95 border border-amber-500/60 backdrop-blur-2xl rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-2xl max-w-[92vw] sm:max-w-md w-full text-center flex flex-col items-center gap-2.5 sm:gap-3 animate-in fade-in zoom-in duration-300 my-auto">
+        <div className="pointer-events-auto relative self-center bg-slate-950/95 border border-amber-500/60 backdrop-blur-2xl rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-2xl max-w-[92vw] sm:max-w-md w-full text-center flex flex-col items-center gap-2.5 sm:gap-3 animate-in fade-in zoom-in duration-300 my-auto shadow-[0_0_35px_rgba(37,99,235,0.25)]">
+          <div className="hud-corner-tl" />
+          <div className="hud-corner-tr" />
+          <div className="hud-corner-bl" />
+          <div className="hud-corner-br" />
 
           <div className="flex items-center justify-between w-full border-b border-slate-800 pb-2">
             <div className="flex items-center gap-1.5 text-[9px] sm:text-[10px] font-mono text-amber-400 uppercase tracking-widest truncate">
               <History className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
               <span className="truncate">
                 {selectedWord.id === lastSubmittedWordId
-                  ? "★ ÚLTIMA PALABRA SUBIDA ★"
+                  ? "★ ÚLTIMA FRASE SUBIDA ★"
                   : "HITO HISTÓRICO TRITECH"}
               </span>
             </div>
@@ -112,23 +126,32 @@ export function HUDOverlay({
         </div>
       )}
 
-      {/* Bottom Fixed Control Bar (Pinned safely above mobile browser bars) */}
-      <div className="pointer-events-auto fixed bottom-3 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 backdrop-blur-2xl bg-slate-950/95 border border-amber-500/50 hover:border-amber-400 rounded-2xl p-2 sm:px-4 sm:py-3 shadow-2xl shadow-blue-950/90 flex items-center justify-center gap-2 sm:gap-3 w-[94vw] sm:w-auto max-w-md sm:max-w-none transition-all pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
+      {/* Bottom Fixed Control Bar (Pinned safely above mobile browser bars with Glassmorphism) */}
+      <div className="pointer-events-auto fixed bottom-3 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 backdrop-blur-2xl bg-black/75 border border-amber-500/50 hover:border-amber-400 rounded-2xl p-2 sm:px-4 sm:py-3 shadow-[0_0_35px_rgba(37,99,235,0.3)] flex items-center justify-center gap-2 sm:gap-3 w-[94vw] sm:w-auto max-w-md sm:max-w-none transition-all pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
+        <div className="hud-corner-tl" />
+        <div className="hud-corner-tr" />
+        <div className="hud-corner-bl" />
+        <div className="hud-corner-br" />
 
-        {/* Primary Button: Digitar Frase / Palabra */}
+        {/* Primary Button: Digitar Frase / Palabra with Loading Ring Feedback */}
         <button
-          onClick={onOpenAddModal}
-          className="flex-1 sm:flex-initial px-4 sm:px-6 py-3 sm:py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg shadow-amber-500/30 flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all ring-2 ring-amber-400/40 animate-pulse"
-          style={{ animationDuration: "3s" }}
+          onClick={handleOpenAdd}
+          disabled={isLoadingAdd}
+          className="flex-1 sm:flex-initial px-4 sm:px-6 py-3 sm:py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg shadow-amber-500/30 flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all ring-2 ring-amber-400/40 animate-pulse relative overflow-hidden"
+          style={{ animationDuration: "3.5s" }}
         >
-          <PlusCircle className="w-4 h-4 text-slate-950 stroke-[2.5]" />
+          {isLoadingAdd ? (
+            <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <PlusCircle className="w-4 h-4 text-slate-950 stroke-[2.5]" />
+          )}
           <span className="whitespace-nowrap">DIGITAR FRASE</span>
         </button>
 
         {/* Secondary Button: Share Snapshot */}
         <button
           onClick={onOpenShareModal}
-          className="px-3.5 sm:px-5 py-3 sm:py-3.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-blue-400 text-slate-200 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 sm:gap-2 hover:scale-[1.03] active:scale-95 transition-all"
+          className="px-3.5 sm:px-5 py-3 sm:py-3.5 rounded-xl bg-slate-900/90 border border-slate-700 hover:border-blue-400 text-slate-200 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 sm:gap-2 hover:scale-[1.03] active:scale-95 transition-all"
         >
           <Camera className="w-4 h-4 text-blue-400" />
           <span className="hidden sm:inline">Compartir</span>
@@ -137,7 +160,7 @@ export function HUDOverlay({
         {/* Tertiary Button: Reset View */}
         <button
           onClick={onResetSelection}
-          className="p-3 sm:p-3.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-all shrink-0"
+          className="p-3 sm:p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 text-slate-400 hover:text-white transition-all shrink-0"
           title="Centrar mapa 3D"
         >
           <RotateCcw className="w-4 h-4" />

@@ -86,8 +86,17 @@ export function AddWordModal({ isOpen, onClose, onAddWord }: AddWordModalProps) 
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="relative z-10 w-full max-w-lg max-h-[92vh] overflow-y-auto bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-8 shadow-2xl"
+            className="relative z-10 w-full max-w-lg max-h-[92vh] overflow-y-auto bg-slate-900/95 border border-slate-800 rounded-3xl p-5 sm:p-8 shadow-2xl backdrop-blur-2xl overflow-hidden"
           >
+            {/* Tactical Laser Scanning Line Effect */}
+            <div className="laser-scanline" />
+
+            {/* HUD Corner Accents */}
+            <div className="hud-corner-tl" />
+            <div className="hud-corner-tr" />
+            <div className="hud-corner-bl" />
+            <div className="hud-corner-br" />
+
             {/* Background Glow */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
 

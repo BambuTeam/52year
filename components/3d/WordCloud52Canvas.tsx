@@ -3,6 +3,7 @@
 import React, { Suspense, useState, useEffect } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
 import { OrbitControls, PerspectiveCamera, Environment, Lightformer } from "@react-three/drei";
+import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import * as THREE from "three";
 import { OrbitingWords3D } from "./OrbitingWords3D";
 import { TritechWord } from "@/lib/wordList";
@@ -100,6 +101,16 @@ export function WordCloud52Canvas({
             <Lightformer form="ring" intensity={3} color="#10b981" position={[0, -10, 8]} scale={[8, 8, 1]} />
             <Lightformer form="circle" intensity={4} color="#ffffff" position={[0, 10, -10]} scale={[14, 14, 1]} />
           </Environment>
+
+          {/* Cinematic Post-processing Bloom Glow for Rings, Golden Badges and Lights */}
+          <EffectComposer enableNormalPass={false} multisampling={0}>
+            <Bloom
+              intensity={1.2}
+              luminanceThreshold={0.4}
+              luminanceSmoothing={0.85}
+              mipmapBlur={true}
+            />
+          </EffectComposer>
         </Suspense>
 
         <OrbitControls
@@ -108,6 +119,8 @@ export function WordCloud52Canvas({
           minDistance={2.5}
           enablePan={false}
           rotateSpeed={0.6}
+          enableDamping={true}
+          dampingFactor={0.05}
           autoRotate={false}
           touches={{ ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN }}
         />

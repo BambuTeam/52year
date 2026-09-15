@@ -67,3 +67,75 @@ html, body {
 .amber-oil-glow {
   animation: amberOilGlow 7s infinite ease-in-out;
 }
+
+/* Cyber-Industrial Laser Scanline Animation */
+@keyframes laserScan {
+  0% {
+    top: 0%;
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.9;
+  }
+  100% {
+    top: 100%;
+    opacity: 0.2;
+  }
+}
+
+.laser-scanline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #38bdf8, #fbbf24, #38bdf8, transparent);
+  box-shadow: 0 0 15px #38bdf8, 0 0 30px #fbbf24;
+  animation: laserScan 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* HUD Tech Corner Elements */
+.hud-corner-tl {
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  width: 8px;
+  height: 8px;
+  border-top: 2px solid #fbbf24;
+  border-left: 2px solid #fbbf24;
+  pointer-events: none;
+}
+
+.hud-corner-tr {
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: 8px;
+  height: 8px;
+  border-top: 2px solid #fbbf24;
+  border-right: 2px solid #fbbf24;
+  pointer-events: none;
+}
+
+.hud-corner-bl {
+  position: absolute;
+  bottom: -1px;
+  left: -1px;
+  width: 8px;
+  height: 8px;
+  border-bottom: 2px solid #fbbf24;
+  border-left: 2px solid #fbbf24;
+  pointer-events: none;
+}
+
+.hud-corner-br {
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 8px;
+  height: 8px;
+  border-bottom: 2px solid #fbbf24;
+  border-right: 2px solid #fbbf24;
+  pointer-events: none;
+}
+
