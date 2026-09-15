@@ -126,8 +126,8 @@ export function HUDOverlay({
         </div>
       )}
 
-      {/* Bottom Fixed Control Bar (Pinned safely above mobile browser bars with Glassmorphism) */}
-      <div className="pointer-events-auto fixed bottom-3 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 backdrop-blur-2xl bg-black/75 border border-amber-500/50 hover:border-amber-400 rounded-2xl p-2 sm:px-4 sm:py-3 shadow-[0_0_35px_rgba(37,99,235,0.3)] flex items-center justify-center gap-2 sm:gap-3 w-[94vw] sm:w-auto max-w-md sm:max-w-none transition-all pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
+      {/* Bottom Fixed Control Bar (Pinned safely above mobile browser gesture bar with Glassmorphism) */}
+      <div className="pointer-events-auto fixed bottom-3 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 backdrop-blur-2xl bg-black/70 border border-white/15 hover:border-amber-400/50 rounded-2xl p-2.5 sm:px-5 sm:py-3.5 shadow-[0_0_35px_rgba(37,99,235,0.3)] flex items-center justify-center gap-2 sm:gap-3.5 w-[94vw] sm:w-auto max-w-md sm:max-w-none transition-all pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
         <div className="hud-corner-tl" />
         <div className="hud-corner-tr" />
         <div className="hud-corner-bl" />
@@ -137,7 +137,7 @@ export function HUDOverlay({
         <button
           onClick={handleOpenAdd}
           disabled={isLoadingAdd}
-          className="flex-1 sm:flex-initial px-4 sm:px-6 py-3 sm:py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg shadow-amber-500/30 flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all ring-2 ring-amber-400/40 animate-pulse relative overflow-hidden"
+          className="flex-1 sm:flex-initial px-5 sm:px-7 py-3 sm:py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg shadow-amber-500/30 flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all ring-2 ring-amber-400/40 animate-pulse relative overflow-hidden"
           style={{ animationDuration: "3.5s" }}
         >
           {isLoadingAdd ? (
@@ -151,10 +151,10 @@ export function HUDOverlay({
         {/* Secondary Button: Share Snapshot */}
         <button
           onClick={onOpenShareModal}
-          className="px-3.5 sm:px-5 py-3 sm:py-3.5 rounded-xl bg-slate-900/90 border border-slate-700 hover:border-blue-400 text-slate-200 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 sm:gap-2 hover:scale-[1.03] active:scale-95 transition-all"
+          className="px-4 sm:px-6 py-3 sm:py-3.5 rounded-xl bg-slate-900/90 border border-slate-700/80 hover:border-cyan-400 text-slate-200 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 sm:gap-2 hover:scale-[1.03] active:scale-95 transition-all"
         >
-          <Camera className="w-4 h-4 text-blue-400" />
-          <span className="hidden sm:inline">Compartir</span>
+          <Camera className="w-4 h-4 text-cyan-400" />
+          <span className="hidden xs:inline sm:inline">COMPARTIR</span>
         </button>
 
         {/* Tertiary Button: Reset View */}

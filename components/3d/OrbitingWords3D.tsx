@@ -14,19 +14,28 @@ interface OrbitingWords3DProps {
   lastSubmittedWordId?: string;
 }
 
+interface WordCloudItemProps {
+  word: TritechWord;
+  onSelect: (word: TritechWord) => void;
+  isSelected: boolean;
+  isLastSubmitted?: boolean;
+  activeFocusId: string | null;
+  setHoveredId: (id: string | null) => void;
+}
+
 function WordCloudItem({
   word,
   onSelect,
   isSelected,
   isLastSubmitted,
-}: {
-  word: TritechWord;
-  onSelect: (word: TritechWord) => void;
-  isSelected: boolean;
-  isLastSubmitted?: boolean;
-}) {
-  const [hovered, setHovered] = useState(false);
+  activeFocusId,
+  setHoveredId,
+}: WordCloudItemProps) {
   const textRef = useRef<THREE.Group>(null);
+  const isHovered = activeFocusId === word.id && !isSelected;
+  const isFocused = isSelected || isHovered;
+  const hasGlobalFocus = Boolean(activeFocusId);
+  const isDimmed = hasGlobalFocus && !isFocused;
 
   useFrame((state) => {
     if (textRef.current) {
@@ -35,24 +44,27 @@ function WordCloudItem({
     }
   });
 
-  const isHighlighted = hovered || isSelected;
-  const textColor = isLastSubmitted ? "#fbbf24" : isHighlighted ? "#fbbf24" : word.color || "#ffffff";
-  const pillScale = isLastSubmitted ? (isHighlighted ? 1.35 : 1.2) : isHighlighted ? 1.25 : 1.0;
-  const pillWidth = Math.max(word.text.length * 0.11 + 0.36, 0.85);
+  const textColor = isLastSubmitted ? "#fbbf24" : isFocused ? "#38bdf8" : word.color || "#ffffff";
+  const pillScale = isLastSubmitted ? (isFocused ? 1.35 : 1.2) : isFocused ? 1.3 : isDimmed ? 0.88 : 1.0;
+  const opacityFactor = isDimmed ? 0.3 : 1.0;
+  const pillWidth = Math.max(word.text.length * 0.11 + 0.36, 0.88);
+
+  // Check if text is numerical/code/metric to format with technical letterSpacing
+  const isTelemetry = /\d|\$|\+/.test(word.text) || Boolean(word.year);
 
   return (
     <group
       ref={textRef}
       position={word.position}
       scale={pillScale}
-      renderOrder={isLastSubmitted || isHighlighted ? 120 : 60}
+      renderOrder={isLastSubmitted || isFocused ? 150 : 60}
       onPointerOver={(e) => {
         e.stopPropagation();
-        setHovered(true);
+        setHoveredId(word.id);
         document.body.style.cursor = "pointer";
       }}
       onPointerOut={() => {
-        setHovered(false);
+        setHoveredId(null);
         document.body.style.cursor = "auto";
       }}
       onClick={(e) => {
@@ -62,66 +74,68 @@ function WordCloudItem({
     >
       {/* Floating Badge Tag for the Last Submitted Phrase */}
       {isLastSubmitted && (
-        <group position={[0, 0.22, 0.02]} renderOrder={150}>
+        <group position={[0, 0.22, 0.02]} renderOrder={160}>
           {/* Badge Background Mesh */}
           <mesh position={[0, 0, -0.005]}>
-            <planeGeometry args={[1.25, 0.15]} />
+            <planeGeometry args={[1.3, 0.16]} />
             <meshStandardMaterial
               color="#451a03"
               emissive="#d97706"
-              emissiveIntensity={1.2}
+              emissiveIntensity={1.4}
               roughness={0.2}
               metalness={0.9}
+              transparent
+              opacity={opacityFactor * 0.95}
               depthTest={false}
             />
           </mesh>
           {/* Badge Golden Border Line */}
           <mesh position={[0, 0, -0.01]}>
-            <planeGeometry args={[1.29, 0.18]} />
-            <meshBasicMaterial color="#fbbf24" depthTest={false} />
+            <planeGeometry args={[1.34, 0.19]} />
+            <meshBasicMaterial color="#fbbf24" transparent opacity={opacityFactor} depthTest={false} />
           </mesh>
           {/* Badge Text */}
           <Text
-            fontSize={0.062}
+            fontSize={0.064}
             letterSpacing={0.06}
             textAlign="center"
             anchorX="center"
             anchorY="middle"
             position={[0, 0, 0.005]}
-            renderOrder={150}
+            renderOrder={160}
           >
             ★ ÚLTIMA FRASE SUBIDA ★
-            <meshBasicMaterial color="#ffffff" depthTest={false} />
+            <meshBasicMaterial color="#ffffff" transparent opacity={opacityFactor} depthTest={false} />
           </Text>
         </group>
       )}
 
-      {/* Contrast Halo Backdrop Mesh to isolate text from background starfield */}
+      {/* Contrast Halo Backdrop Mesh */}
       <mesh position={[0, 0, -0.025]}>
         <planeGeometry args={[pillWidth + 0.35, 0.42]} />
-        <meshBasicMaterial color="#02040a" transparent opacity={0.7} depthTest={false} />
+        <meshBasicMaterial color="#02040a" transparent opacity={opacityFactor * 0.75} depthTest={false} />
       </mesh>
 
-      {/* 3D Glass Pill Backdrop Container Mesh */}
+      {/* 3D Glass Pill Backdrop Container Mesh (High-Opacity Dark Glass bg-black/90) */}
       <mesh position={[0, 0, -0.015]}>
         <planeGeometry args={[pillWidth, 0.22]} />
         <meshStandardMaterial
-          color={isLastSubmitted ? "#1e1b4b" : isHighlighted ? "#0f172a" : "#040817"}
-          roughness={0.2}
-          metalness={0.92}
+          color={isLastSubmitted ? "#1e1b4b" : isFocused ? "#0c1938" : "#030712"}
+          roughness={0.15}
+          metalness={0.95}
           transparent
-          opacity={isLastSubmitted ? 0.95 : isHighlighted ? 0.95 : 0.88}
+          opacity={opacityFactor * (isLastSubmitted ? 0.98 : isFocused ? 0.95 : 0.9)}
           depthTest={false}
         />
       </mesh>
 
-      {/* 3D Glass Pill Border Line */}
+      {/* 3D Glass Pill Thin Cyan Border (border-cyan-500/30) */}
       <mesh position={[0, 0, -0.02]}>
         <planeGeometry args={[pillWidth + 0.03, 0.25]} />
         <meshBasicMaterial
-          color={isLastSubmitted ? "#f59e0b" : isHighlighted ? "#fbbf24" : "#1e293b"}
+          color={isLastSubmitted ? "#f59e0b" : isFocused ? "#38bdf8" : "#06b6d4"}
           transparent
-          opacity={isLastSubmitted ? 1.0 : isHighlighted ? 0.95 : 0.65}
+          opacity={opacityFactor * (isLastSubmitted ? 1.0 : isFocused ? 0.95 : 0.4)}
           depthTest={false}
         />
       </mesh>
@@ -129,24 +143,31 @@ function WordCloudItem({
       {/* Swatch Color Bullet Sphere */}
       <mesh position={[-pillWidth / 2 + 0.12, 0, 0]}>
         <sphereGeometry args={[isLastSubmitted ? 0.042 : 0.032, 16, 16]} />
-        <meshBasicMaterial color={isLastSubmitted ? "#fbbf24" : word.color || "#38bdf8"} depthTest={false} />
+        <meshBasicMaterial
+          color={isLastSubmitted ? "#fbbf24" : word.color || "#38bdf8"}
+          transparent
+          opacity={opacityFactor}
+          depthTest={false}
+        />
       </mesh>
 
-      {/* 3D Concept Text */}
+      {/* 3D Concept Text with Sharp Drop Shadow Emissive Glow */}
       <Text
         fontSize={0.105}
-        letterSpacing={0.05}
+        letterSpacing={isTelemetry ? 0.08 : 0.04}
         textAlign="left"
         anchorX="center"
         anchorY="middle"
         position={[0.05, 0, 0]}
-        renderOrder={130}
+        renderOrder={140}
       >
         {word.text}
         <meshStandardMaterial
           color={textColor}
-          emissive={isLastSubmitted ? "#f59e0b" : isHighlighted ? "#f59e0b" : textColor === "#ffffff" ? "#1d4ed8" : textColor}
-          emissiveIntensity={isLastSubmitted ? 2.2 : isHighlighted ? 1.5 : 0.6}
+          emissive={isLastSubmitted ? "#f59e0b" : isFocused ? "#38bdf8" : textColor === "#ffffff" ? "#1d4ed8" : textColor}
+          emissiveIntensity={isLastSubmitted ? 2.2 : isFocused ? 1.8 : opacityFactor * 0.7}
+          transparent
+          opacity={opacityFactor}
           depthTest={false}
         />
       </Text>
@@ -164,14 +185,17 @@ export function OrbitingWords3D({
   const starFarRef = useRef<THREE.Group>(null);
   const starMidRef = useRef<THREE.Group>(null);
   const starNearRef = useRef<THREE.Group>(null);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [scaleFactor, setScaleFactor] = useState(0.01);
+
+  const activeFocusId = selectedWordId || hoveredId;
 
   useFrame((state, delta) => {
     const t = state.clock.getElapsedTime();
 
-    // Smooth staggered scale intro on load
+    // Smooth staggered radar entry scaling on load
     if (scaleFactor < 1) {
-      setScaleFactor((prev) => Math.min(1, prev + delta * 1.8));
+      setScaleFactor((prev) => Math.min(1, prev + delta * 1.6));
     }
 
     if (orbitGroupRef.current) {
@@ -224,6 +248,8 @@ export function OrbitingWords3D({
               onSelect={onSelectWord}
               isSelected={word.id === selectedWordId}
               isLastSubmitted={word.id === lastSubmittedWordId}
+              activeFocusId={activeFocusId}
+              setHoveredId={setHoveredId}
             />
           ))}
         </Float>

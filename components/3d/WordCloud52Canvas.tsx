@@ -22,13 +22,13 @@ function ResponsiveCameraController() {
     const aspect = size.width / size.height;
     if (camera instanceof THREE.PerspectiveCamera) {
       if (aspect < 0.75) {
-        // Narrow mobile portrait (iPhone / Android portrait) - Zoomed in & centered
-        camera.position.set(0, 0, 9.6);
-        camera.fov = 50;
+        // Narrow mobile portrait (iPhone / Android portrait) - Balanced zoom & milestone separation
+        camera.position.set(0, 0, 10.4);
+        camera.fov = 52;
       } else if (aspect < 1.0) {
         // Mobile / Tablet portrait
-        camera.position.set(0, 0, 10.2);
-        camera.fov = 48;
+        camera.position.set(0, 0, 10.6);
+        camera.fov = 49;
       } else if (aspect < 1.3) {
         // Small laptop / tablet landscape
         camera.position.set(0, 0, 11.2);
