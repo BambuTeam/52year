@@ -81,11 +81,11 @@ export function WordCloud52Canvas({
         <ResponsiveCameraController />
 
         {/* Ambient & Studio Directional Lights */}
-        <ambientLight intensity={0.7} color="#0f172a" />
-        <directionalLight position={[10, 12, 10]} intensity={2.5} color="#ffffff" />
-        <directionalLight position={[-10, -10, -5]} intensity={1.8} color="#3b82f6" />
-        <directionalLight position={[0, -10, 8]} intensity={1.5} color="#10b981" />
-        <pointLight position={[0, 0, 4]} intensity={1.2} color="#38bdf8" />
+        <ambientLight intensity={0.4} color="#0f172a" />
+        <directionalLight position={[10, 12, 10]} intensity={1.5} color="#ffffff" />
+        <directionalLight position={[-10, -10, -5]} intensity={1.0} color="#3b82f6" />
+        <directionalLight position={[0, -10, 8]} intensity={0.8} color="#10b981" />
+        <pointLight position={[0, 0, 4]} intensity={0.8} color="#38bdf8" />
 
         <Suspense fallback={null}>
           <OrbitingWords3D
@@ -96,18 +96,18 @@ export function WordCloud52Canvas({
           />
           {/* 100% Offline Procedural Metallic Environment Map */}
           <Environment background={false}>
-            <Lightformer form="rect" intensity={5} color="#ffffff" position={[10, 10, 10]} scale={[12, 12, 1]} />
-            <Lightformer form="rect" intensity={3} color="#38bdf8" position={[-10, -10, -5]} scale={[10, 10, 1]} />
-            <Lightformer form="ring" intensity={3} color="#10b981" position={[0, -10, 8]} scale={[8, 8, 1]} />
-            <Lightformer form="circle" intensity={4} color="#ffffff" position={[0, 10, -10]} scale={[14, 14, 1]} />
+            <Lightformer form="rect" intensity={2} color="#ffffff" position={[10, 10, 10]} scale={[12, 12, 1]} />
+            <Lightformer form="rect" intensity={1.5} color="#38bdf8" position={[-10, -10, -5]} scale={[10, 10, 1]} />
+            <Lightformer form="ring" intensity={1.2} color="#10b981" position={[0, -10, 8]} scale={[8, 8, 1]} />
+            <Lightformer form="circle" intensity={1.8} color="#ffffff" position={[0, 10, -10]} scale={[14, 14, 1]} />
           </Environment>
 
-          {/* Cinematic Post-processing Bloom Glow for Rings, Golden Badges and Lights */}
+          {/* Ultra-subtle Post-processing Bloom (No glare, crisp contrast) */}
           <EffectComposer enableNormalPass={false} multisampling={0}>
             <Bloom
-              intensity={1.2}
-              luminanceThreshold={0.4}
-              luminanceSmoothing={0.85}
+              intensity={0.25}
+              luminanceThreshold={0.85}
+              luminanceSmoothing={0.9}
               mipmapBlur={true}
             />
           </EffectComposer>
