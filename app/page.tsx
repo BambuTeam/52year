@@ -13,6 +13,7 @@ const BACKGROUND_VIDEOS = [
   "/gears_alt.mp4",
 ];
 const VIDEO_ROTATION_MS = 25 * 1000; // Automatic rotation every 25 seconds
+const LOCAL_STORAGE_KEY = "tritech_52year_local_words";
 
 export default function Home() {
   const [words, setWords] = useState<TritechWord[]>(INITIAL_TRITECH_WORDS);
@@ -24,6 +25,21 @@ export default function Home() {
 
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
+  // Load local user-contributed words on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (saved) {
+        const parsed: TritechWord[] = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setWords((prev) => [...parsed, ...prev]);
+        }
+      }
+    } catch (e) {
+      console.error("Error reading localStorage words:", e);
+    }
+  }, []);
+
   // Automatic background video rotation between the 3 videos
   useEffect(() => {
     const interval = setInterval(() => {
@@ -32,7 +48,7 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
-  // Guarantee all 3 video streams actively play in sync for instant smooth 3s crossfading
+  // Guarantee video playback
   useEffect(() => {
     videoRefs.current.forEach((vid) => {
       if (vid) {
@@ -46,7 +62,17 @@ export default function Home() {
   };
 
   const handleAddWord = (newWordObj: TritechWord) => {
-    setWords((prev) => [newWordObj, ...prev]);
+    setWords((prev) => {
+      const updated = [newWordObj, ...prev];
+      // Persist only custom user words locally
+      const customOnly = updated.filter((w) => w.isCustom);
+      try {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(customOnly));
+      } catch (e) {
+        console.error("Error saving to localStorage:", e);
+      }
+      return updated;
+    });
     setSelectedWord(newWordObj);
     setLastSubmittedWordId(newWordObj.id);
   };

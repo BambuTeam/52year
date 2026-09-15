@@ -112,35 +112,35 @@ export function HUDOverlay({
         </div>
       )}
 
-      {/* Bottom Floating Control Bar */}
-      <div className="pointer-events-auto self-center backdrop-blur-2xl bg-slate-950/90 border border-slate-800/90 rounded-2xl px-3 py-2.5 sm:px-4 sm:py-3 shadow-2xl flex items-center gap-2 sm:gap-3 max-w-[96vw] sm:max-w-none">
+      {/* Bottom Fixed Control Bar (Pinned safely above mobile browser bars) */}
+      <div className="pointer-events-auto fixed bottom-3 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 backdrop-blur-2xl bg-slate-950/95 border border-amber-500/50 hover:border-amber-400 rounded-2xl p-2 sm:px-4 sm:py-3 shadow-2xl shadow-blue-950/90 flex items-center justify-center gap-2 sm:gap-3 w-[94vw] sm:w-auto max-w-md sm:max-w-none transition-all pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
 
-        {/* Button 1: Add Word */}
+        {/* Primary Button: Digitar Frase / Palabra */}
         <button
           onClick={onOpenAddModal}
-          className="px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-blue-600 via-blue-500 to-sky-600 text-white font-bold text-[10px] sm:text-xs uppercase tracking-wider shadow-lg shadow-blue-600/30 flex items-center gap-1.5 sm:gap-2 hover:scale-105 active:scale-95 transition-all"
+          className="flex-1 sm:flex-initial px-4 sm:px-6 py-3 sm:py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg shadow-amber-500/30 flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all ring-2 ring-amber-400/40 animate-pulse"
+          style={{ animationDuration: "3s" }}
         >
-          <PlusCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-          <span>Sumar mi Palabra</span>
+          <PlusCircle className="w-4 h-4 text-slate-950 stroke-[2.5]" />
+          <span className="whitespace-nowrap">DIGITAR FRASE</span>
         </button>
 
-        {/* Button 2: Share Snapshot */}
+        {/* Secondary Button: Share Snapshot */}
         <button
           onClick={onOpenShareModal}
-          className="px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-slate-900 border border-amber-500/40 hover:border-amber-500 text-amber-300 font-bold text-[10px] sm:text-xs uppercase tracking-wider flex items-center gap-1.5 sm:gap-2 hover:scale-105 active:scale-95 transition-all"
+          className="px-3.5 sm:px-5 py-3 sm:py-3.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-blue-400 text-slate-200 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 sm:gap-2 hover:scale-[1.03] active:scale-95 transition-all"
         >
-          <Camera className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400" />
-          <span className="hidden xs:inline">Capturar & Compartir</span>
-          <span className="xs:hidden">Compartir</span>
+          <Camera className="w-4 h-4 text-blue-400" />
+          <span className="hidden sm:inline">Compartir</span>
         </button>
 
-        {/* Button 3: Reset View */}
+        {/* Tertiary Button: Reset View */}
         <button
           onClick={onResetSelection}
-          className="p-2.5 sm:p-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-all shrink-0"
+          className="p-3 sm:p-3.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-all shrink-0"
           title="Centrar mapa 3D"
         >
-          <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          <RotateCcw className="w-4 h-4" />
         </button>
 
       </div>

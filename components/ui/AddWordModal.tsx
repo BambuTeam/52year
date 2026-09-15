@@ -30,8 +30,8 @@ export function AddWordModal({ isOpen, onClose, onAddWord }: AddWordModalProps) 
   ];
 
   const handleWordChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value.replace(/\s+/g, "").toUpperCase();
-    if (val.length <= 20) {
+    const val = e.target.value.toUpperCase();
+    if (val.length <= 45) {
       setWordText(val);
     }
   };
@@ -71,14 +71,14 @@ export function AddWordModal({ isOpen, onClose, onAddWord }: AddWordModalProps) 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
           {/* Backdrop Blur */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-slate-950/80 backdrop-blur-md"
+            className="absolute inset-0 bg-slate-950/85 backdrop-blur-md"
           />
 
           {/* Modal Container */}
@@ -86,7 +86,7 @@ export function AddWordModal({ isOpen, onClose, onAddWord }: AddWordModalProps) 
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="relative z-10 w-full max-w-lg max-h-[92vh] overflow-y-auto bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl"
+            className="relative z-10 w-full max-w-lg max-h-[92vh] overflow-y-auto bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-8 shadow-2xl"
           >
             {/* Background Glow */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
@@ -94,7 +94,7 @@ export function AddWordModal({ isOpen, onClose, onAddWord }: AddWordModalProps) 
             {/* Close Button */}
             <button
               onClick={onClose}
-              className="absolute top-5 right-5 p-2 rounded-xl bg-slate-950 text-slate-400 hover:text-white border border-slate-800 transition-all"
+              className="absolute top-4 right-4 p-2.5 rounded-xl bg-slate-950 text-slate-400 hover:text-white border border-slate-800 transition-all z-20"
             >
               <X className="w-5 h-5" />
             </button>
@@ -104,42 +104,42 @@ export function AddWordModal({ isOpen, onClose, onAddWord }: AddWordModalProps) 
                 <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center">
                   <CheckCircle2 className="w-10 h-10" />
                 </div>
-                <h3 className="text-2xl font-bold text-white">¡Palabra Integrada al 52!</h3>
-                <p className="text-slate-400 text-xs">
-                  Tu palabra <strong className="text-amber-400">&ldquo;{wordText}&rdquo;</strong> ({country}) ahora orbita en el mapa 3D conmemorativo de Grupo Tritech.
+                <h3 className="text-2xl font-bold text-white">¡Frase Guardada y Almacenada!</h3>
+                <p className="text-slate-400 text-xs leading-relaxed">
+                  Tu frase <strong className="text-amber-400">&ldquo;{wordText}&rdquo;</strong> ({country}) se guardó localmente y ya orbita en el mapa 3D conmemorativo de Grupo Tritech.
                 </p>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+              <form onSubmit={handleSubmit} className="flex flex-col gap-4 sm:gap-5">
                 
                 <div className="flex flex-col gap-1">
-                  <div className="inline-flex items-center gap-2 text-xs font-mono text-amber-400 uppercase tracking-widest">
-                    <Sparkles className="w-4 h-4" />
+                  <div className="inline-flex items-center gap-2 text-[10px] sm:text-xs font-mono text-amber-400 uppercase tracking-widest">
+                    <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     CAMPAÑA 52 AÑOS TRITECH
                   </div>
-                  <h3 className="text-2xl font-bold text-white tracking-tight">
-                    Suma tu Palabra al Mapa 3D
+                  <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                    Digita tu Frase o Comentario
                   </h3>
                   <p className="text-slate-400 text-xs font-light">
-                    Escribe la palabra que representa los 52 años de trayectoria y tu experiencia en Tritech.
+                    Escribe un mensaje, palabra o frase conmemorativa para dejar tu huella en los 52 años de Grupo Tritech.
                   </p>
                 </div>
 
-                {/* Field 1: Word */}
-                <div className="flex flex-col gap-2">
+                {/* Field 1: Word or Phrase */}
+                <div className="flex flex-col gap-1.5">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-mono uppercase tracking-wider text-slate-300">
-                      Tu Palabra Clave (1 sola palabra) <span className="text-amber-400">*</span>
+                    <label className="text-xs font-mono uppercase tracking-wider text-slate-300 font-semibold">
+                      Tu Frase o Mensaje <span className="text-amber-400">*</span>
                     </label>
-                    <span className="text-[10px] font-mono text-slate-500">{wordText.length}/20</span>
+                    <span className="text-[10px] font-mono text-slate-500">{wordText.length}/45</span>
                   </div>
                   <input
                     type="text"
                     required
-                    placeholder="Ej. CONFIANZA, ALIADOS, FUTURO"
+                    placeholder="Ej. 52 AÑOS DE ÉXITO TRITECH"
                     value={wordText}
                     onChange={handleWordChange}
-                    className="w-full px-4 py-3.5 rounded-xl bg-slate-950 border border-amber-500/50 text-amber-300 placeholder:text-slate-600 focus:outline-none focus:border-amber-400 text-base font-extrabold uppercase tracking-widest transition-all"
+                    className="w-full px-4 py-3.5 rounded-xl bg-slate-950 border border-amber-500/60 text-amber-300 placeholder:text-slate-600 focus:outline-none focus:border-amber-400 text-sm sm:text-base font-extrabold uppercase tracking-wider transition-all shadow-inner"
                   />
                 </div>
 

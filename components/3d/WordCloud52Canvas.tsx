@@ -21,17 +21,17 @@ function ResponsiveCameraController() {
     const aspect = size.width / size.height;
     if (camera instanceof THREE.PerspectiveCamera) {
       if (aspect < 0.75) {
-        // Narrow mobile portrait (iPhone / Android portrait)
-        camera.position.set(0, 0, 16.5);
-        camera.fov = 55;
+        // Narrow mobile portrait (iPhone / Android portrait) - Zoomed in & centered
+        camera.position.set(0, 0, 9.6);
+        camera.fov = 50;
       } else if (aspect < 1.0) {
         // Mobile / Tablet portrait
-        camera.position.set(0, 0, 14.2);
-        camera.fov = 50;
+        camera.position.set(0, 0, 10.2);
+        camera.fov = 48;
       } else if (aspect < 1.3) {
         // Small laptop / tablet landscape
-        camera.position.set(0, 0, 12.2);
-        camera.fov = 48;
+        camera.position.set(0, 0, 11.2);
+        camera.fov = 46;
       } else {
         // Desktop / 4K monitors
         camera.position.set(0, 0, 10.8);
@@ -104,8 +104,8 @@ export function WordCloud52Canvas({
 
         <OrbitControls
           enableZoom={true}
-          maxDistance={25}
-          minDistance={4}
+          maxDistance={22}
+          minDistance={2.5}
           enablePan={false}
           rotateSpeed={0.6}
           autoRotate={false}
