@@ -36,20 +36,20 @@ export function HUDOverlay({
 
       {/* Top Bar: Brand & Stats */}
       <div className="flex items-center justify-between w-full gap-2">
-        {/* Top-Left: Official Logo Floating Pill */}
-        <div className="pointer-events-auto relative flex items-center gap-2.5 sm:gap-3.5 backdrop-blur-2xl bg-slate-950/90 border border-slate-800/90 hover:border-blue-500/50 rounded-full px-3.5 py-2 sm:px-5 sm:py-2.5 shadow-2xl shadow-blue-950/60 transition-all hover:scale-105 group overflow-hidden">
+        {/* Top-Left: Elevated Official Tritech Corporate Logo Pill */}
+        <div className="pointer-events-auto relative flex items-center gap-3 sm:gap-4 backdrop-blur-2xl bg-slate-950/90 border border-cyan-400/40 hover:border-cyan-400/80 rounded-full px-4 py-2.5 sm:px-6 sm:py-3.5 shadow-[0_0_25px_rgba(6,182,212,0.25)] transition-all hover:scale-[1.03] group overflow-hidden">
           <img
             src="/l_oficial.svg"
             alt="Grupo Tritech Logo Oficial"
-            className="h-6 sm:h-8 md:h-9 w-auto object-contain filter drop-shadow-[0_2px_10px_rgba(56,102,242,0.4)] group-hover:scale-105 transition-transform"
+            className="h-8 sm:h-10 md:h-12 w-auto object-contain filter drop-shadow-[0_0_12px_rgba(6,182,212,0.5)] group-hover:scale-105 transition-transform"
           />
-          <div className="h-4 sm:h-5 w-px bg-slate-800/90 hidden xs:block" />
+          <div className="h-5 sm:h-7 w-px bg-cyan-400/30 hidden xs:block" />
           <div className="hidden xs:flex flex-col">
-            <span className="text-white font-extrabold tracking-widest text-[8px] sm:text-[10px] uppercase flex items-center gap-1.5 font-sans">
+            <span className="text-white font-extrabold tracking-widest text-[9px] sm:text-[11px] uppercase flex items-center gap-1.5 font-sans">
               52 AÑOS DE HISTORIA
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_#38bdf8]" />
             </span>
-            <span className="text-[8px] sm:text-[9px] text-amber-400 font-mono tracking-widest uppercase">
+            <span className="text-[9px] sm:text-[10px] text-amber-400 font-mono tracking-widest uppercase font-bold">
               1974 - 2026
             </span>
           </div>
@@ -126,19 +126,24 @@ export function HUDOverlay({
         </div>
       )}
 
-      {/* Bottom Fixed Control Bar (Pinned safely above mobile browser gesture bar with Glassmorphism) */}
-      <div className="pointer-events-auto fixed bottom-3 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 backdrop-blur-2xl bg-black/70 border border-white/15 hover:border-amber-400/50 rounded-2xl p-2.5 sm:px-5 sm:py-3.5 shadow-[0_0_35px_rgba(37,99,235,0.3)] flex items-center justify-center gap-2 sm:gap-3.5 w-[94vw] sm:w-auto max-w-md sm:max-w-none transition-all pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
-        <div className="hud-corner-tl" />
-        <div className="hud-corner-tr" />
-        <div className="hud-corner-bl" />
-        <div className="hud-corner-br" />
+      {/* Bottom Fixed Control Bar: Spacecraft Command Strip with Low-Profile Perimeter Glow */}
+      <div className="pointer-events-auto fixed bottom-3 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 backdrop-blur-2xl bg-cyan-950/30 border border-cyan-400/30 hover:border-cyan-400/60 rounded-3xl p-2 sm:px-5 sm:py-3 shadow-[0_0_20px_rgba(6,182,212,0.18),inset_0_1px_1px_rgba(255,255,255,0.12)] flex items-center justify-center gap-2 sm:gap-3.5 w-[94vw] sm:w-auto max-w-md sm:max-w-none transition-all pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+        <div className="hud-corner-tl !border-cyan-400/70" />
+        <div className="hud-corner-tr !border-cyan-400/70" />
+        <div className="hud-corner-bl !border-cyan-400/70" />
+        <div className="hud-corner-br !border-cyan-400/70" />
+
+        {/* Spacecraft Telemetry Status Indicator */}
+        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-950/60 border border-cyan-400/30 text-[9px] font-mono text-cyan-300 tracking-wider uppercase mr-1 shrink-0">
+          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+          COMMAND STRIP
+        </div>
 
         {/* Primary Button: Digitar Frase / Palabra with Loading Ring Feedback */}
         <button
           onClick={handleOpenAdd}
           disabled={isLoadingAdd}
-          className="flex-1 sm:flex-initial px-5 sm:px-7 py-3 sm:py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg shadow-amber-500/30 flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all ring-2 ring-amber-400/40 animate-pulse relative overflow-hidden"
-          style={{ animationDuration: "3.5s" }}
+          className="flex-1 sm:flex-initial px-5 sm:px-7 py-3 sm:py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all ring-2 ring-amber-400/40 relative overflow-hidden"
         >
           {isLoadingAdd ? (
             <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
@@ -151,7 +156,7 @@ export function HUDOverlay({
         {/* Secondary Button: Share Snapshot */}
         <button
           onClick={onOpenShareModal}
-          className="px-4 sm:px-6 py-3 sm:py-3.5 rounded-xl bg-slate-900/90 border border-slate-700/80 hover:border-cyan-400 text-slate-200 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 sm:gap-2 hover:scale-[1.03] active:scale-95 transition-all"
+          className="px-4 sm:px-6 py-3 sm:py-3.5 rounded-2xl bg-slate-900/80 border border-cyan-400/30 hover:border-cyan-400 text-slate-200 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 sm:gap-2 hover:bg-cyan-950/50 hover:scale-[1.03] active:scale-95 transition-all shadow-[inset_0_0_10px_rgba(6,182,212,0.15)]"
         >
           <Camera className="w-4 h-4 text-cyan-400" />
           <span className="hidden xs:inline sm:inline">COMPARTIR</span>
@@ -160,7 +165,7 @@ export function HUDOverlay({
         {/* Tertiary Button: Reset View */}
         <button
           onClick={onResetSelection}
-          className="p-3 sm:p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 text-slate-400 hover:text-white transition-all shrink-0"
+          className="p-3 sm:p-3.5 rounded-2xl bg-slate-900/80 border border-slate-700/60 text-slate-400 hover:text-cyan-300 hover:border-cyan-400/40 hover:bg-cyan-950/40 transition-all shrink-0"
           title="Centrar mapa 3D"
         >
           <RotateCcw className="w-4 h-4" />

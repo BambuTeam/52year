@@ -13,22 +13,39 @@ export default function Home() {
   const [words, setWords] = useState<TritechWord[]>(INITIAL_TRITECH_WORDS);
   const [selectedWord, setSelectedWord] = useState<TritechWord | null>(null);
   const [lastSubmittedWordId, setLastSubmittedWordId] = useState<string | undefined>(undefined);
+  const [powerUpTimestamp, setPowerUpTimestamp] = useState<number | undefined>(undefined);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
 
-  // Load local user-contributed words on mount
+  // Load persistent user-contributed words from database API on mount
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (saved) {
-        const parsed: TritechWord[] = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setWords((prev) => [...parsed, ...prev]);
+    async function loadBackendPhrases() {
+      try {
+        const res = await fetch("/api/phrases");
+        const data = await res.json();
+        if (data.success && Array.isArray(data.phrases)) {
+          const dbWords: TritechWord[] = data.phrases.map((p: any) => ({
+            id: p.id,
+            text: p.text,
+            author: p.author,
+            plant: p.department,
+            country: p.country,
+            position: p.position,
+            color: p.color || "#f59e0b",
+            isCustom: true,
+          }));
+
+          setWords((prev) => {
+            const staticOnly = prev.filter((w) => !w.isCustom);
+            return [...dbWords, ...staticOnly];
+          });
         }
+      } catch (e) {
+        console.error("Error fetching database phrases:", e);
       }
-    } catch (e) {
-      console.error("Error reading localStorage words:", e);
     }
+
+    loadBackendPhrases();
   }, []);
 
   const handleSelectWord = (word: TritechWord) => {
@@ -36,19 +53,10 @@ export default function Home() {
   };
 
   const handleAddWord = (newWordObj: TritechWord) => {
-    setWords((prev) => {
-      const updated = [newWordObj, ...prev];
-      // Persist only custom user words locally
-      const customOnly = updated.filter((w) => w.isCustom);
-      try {
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(customOnly));
-      } catch (e) {
-        console.error("Error saving to localStorage:", e);
-      }
-      return updated;
-    });
+    setWords((prev) => [newWordObj, ...prev.filter((w) => w.id !== newWordObj.id)]);
     setSelectedWord(newWordObj);
     setLastSubmittedWordId(newWordObj.id);
+    setPowerUpTimestamp(Date.now()); // Trigger 3.5s Wankel Core Power-Up Surge!
   };
 
   const handleResetSelection = () => {
@@ -78,6 +86,7 @@ export default function Home() {
           onSelectWord={handleSelectWord}
           selectedWordId={selectedWord?.id}
           lastSubmittedWordId={lastSubmittedWordId}
+          powerUpTimestamp={powerUpTimestamp}
         />
       </div>
 

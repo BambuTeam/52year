@@ -2,7 +2,7 @@
 
 import React, { useState, ChangeEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Sparkles, User, Globe, CheckCircle2 } from "lucide-react";
+import { X, Sparkles, User, Building2, MessageSquareQuote, CheckCircle2, Loader2 } from "lucide-react";
 import { TritechWord } from "@/lib/wordList";
 
 interface AddWordModalProps {
@@ -12,188 +12,217 @@ interface AddWordModalProps {
 }
 
 export function AddWordModal({ isOpen, onClose, onAddWord }: AddWordModalProps) {
-  const [wordText, setWordText] = useState("");
-  const [authorName, setAuthorName] = useState("");
-  const [country, setCountry] = useState("Guatemala");
+  const [message, setMessage] = useState("");
+  const [author, setAuthor] = useState("");
+  const [department, setDepartment] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const countriesList = [
-    "Guatemala",
-    "El Salvador",
-    "Costa Rica",
-    "México",
-    "Colombia",
-    "Nicaragua",
-    "Honduras",
-    "Panamá",
-    "República Dominicana",
-  ];
-
-  const handleWordChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleMessageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value.toUpperCase();
-    if (val.length <= 45) {
-      setWordText(val);
+    if (val.length <= 48) {
+      setMessage(val);
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!wordText.trim()) return;
+    if (!message.trim()) return;
 
-    // Random orbit radius & angle for newly added custom words
-    const angle = Math.random() * Math.PI * 2;
-    const radius = 3.5 + Math.random() * 2;
-    const z = (Math.random() - 0.5) * 2;
+    setIsSubmitting(true);
+    setErrorMessage("");
 
-    const newWordObj: TritechWord = {
-      id: `custom-${Date.now()}`,
-      text: wordText.trim(),
-      author: authorName.trim() || "Colaborador Tritech",
-      plant: country,
-      country: country,
-      position: [Math.cos(angle) * radius, Math.sin(angle) * radius * 0.8, z],
-      color: "#f59e0b", // Gold highlight for user contributed words
-      size: 1.3,
-      isCustom: true,
-    };
+    try {
+      const res = await fetch("/api/phrases", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: message.trim(),
+          author: author.trim() || "Colaborador Tritech",
+          department: department.trim() || "Grupo Tritech",
+        }),
+      });
 
-    onAddWord(newWordObj);
-    setSuccess(true);
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Error guardando la frase.");
+      }
 
-    setTimeout(() => {
-      setSuccess(false);
-      setWordText("");
-      setAuthorName("");
-      onClose();
-    }, 1500);
+      const createdPhrase = data.phrase;
+
+      // Pass new 3D word item up to main state
+      const newWordObj: TritechWord = {
+        id: createdPhrase.id,
+        text: createdPhrase.text,
+        author: createdPhrase.author,
+        plant: createdPhrase.department,
+        country: createdPhrase.country,
+        position: createdPhrase.position,
+        color: createdPhrase.color || "#f59e0b",
+        isCustom: true,
+      };
+
+      onAddWord(newWordObj);
+      setSuccess(true);
+
+      setTimeout(() => {
+        setSuccess(false);
+        setMessage("");
+        setAuthor("");
+        setDepartment("");
+        setIsSubmitting(false);
+        onClose();
+      }, 1600);
+    } catch (err: any) {
+      console.error("Submission error:", err);
+      setErrorMessage(err.message || "No se pudo enviar el mensaje.");
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
-          {/* Backdrop Blur */}
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 selection:bg-none">
+          {/* Glassmorphism Backdrop Overlay */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-slate-950/85 backdrop-blur-md"
+            className="absolute inset-0 bg-slate-950/80 backdrop-blur-xl"
           />
 
-          {/* Modal Container */}
+          {/* Holographic Glass Modal Container */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="relative z-10 w-full max-w-lg max-h-[92vh] overflow-y-auto bg-slate-900/95 border border-slate-800 rounded-3xl p-5 sm:p-8 shadow-2xl backdrop-blur-2xl overflow-hidden"
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className="relative z-10 w-full max-w-lg max-h-[92vh] overflow-y-auto bg-slate-950/80 border border-cyan-400/30 rounded-3xl p-6 sm:p-8 shadow-[0_0_50px_rgba(6,182,212,0.15),inset_0_1px_1px_rgba(255,255,255,0.1)] backdrop-blur-2xl overflow-hidden"
           >
-            {/* Tactical Laser Scanning Line Effect */}
+            {/* Tactical Scanline */}
             <div className="laser-scanline" />
 
-            {/* HUD Corner Accents */}
-            <div className="hud-corner-tl" />
-            <div className="hud-corner-tr" />
-            <div className="hud-corner-bl" />
-            <div className="hud-corner-br" />
+            {/* Cyan HUD Corner Markers */}
+            <div className="hud-corner-tl !border-cyan-400/70" />
+            <div className="hud-corner-tr !border-cyan-400/70" />
+            <div className="hud-corner-bl !border-cyan-400/70" />
+            <div className="hud-corner-br !border-cyan-400/70" />
 
-            {/* Background Glow */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
+            {/* Soft Cyan Background Radial Glow */}
+            <div className="absolute top-0 right-0 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
 
-            {/* Close Button */}
+            {/* Close Action Button */}
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 p-2.5 rounded-xl bg-slate-950 text-slate-400 hover:text-white border border-slate-800 transition-all z-20"
+              className="absolute top-4 right-4 p-2.5 rounded-2xl bg-cyan-950/50 text-cyan-300 hover:text-white border border-cyan-400/30 hover:border-cyan-400/60 transition-all z-20"
             >
               <X className="w-5 h-5" />
             </button>
 
             {success ? (
-              <div className="py-8 flex flex-col items-center text-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center">
-                  <CheckCircle2 className="w-10 h-10" />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="py-10 flex flex-col items-center text-center gap-4"
+              >
+                <div className="w-20 h-20 rounded-full bg-cyan-500/20 border-2 border-cyan-400 text-cyan-300 flex items-center justify-center shadow-[0_0_30px_rgba(6,182,212,0.4)] animate-bounce">
+                  <CheckCircle2 className="w-12 h-12 stroke-[2.2]" />
                 </div>
-                <h3 className="text-2xl font-bold text-white">¡Frase Guardada y Almacenada!</h3>
-                <p className="text-slate-400 text-xs leading-relaxed">
-                  Tu frase <strong className="text-amber-400">&ldquo;{wordText}&rdquo;</strong> ({country}) se guardó localmente y ya orbita en el mapa 3D conmemorativo de Grupo Tritech.
+                <h3 className="text-2xl font-mono font-bold text-white tracking-tight">
+                  ¡Frase Registrada en la Galaxia!
+                </h3>
+                <p className="text-slate-300 text-xs sm:text-sm leading-relaxed max-w-xs font-mono">
+                  Tu mensaje <strong className="text-amber-400 font-bold">&ldquo;{message}&rdquo;</strong> se guardó exitosamente y ya orbita con la insignia dorada.
                 </p>
-              </div>
+              </motion.div>
             ) : (
               <form onSubmit={handleSubmit} className="flex flex-col gap-4 sm:gap-5">
-                
                 <div className="flex flex-col gap-1">
-                  <div className="inline-flex items-center gap-2 text-[10px] sm:text-xs font-mono text-amber-400 uppercase tracking-widest">
-                    <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                    CAMPAÑA 52 AÑOS TRITECH
+                  <div className="inline-flex items-center gap-2 text-[10px] sm:text-xs font-mono text-cyan-400 uppercase tracking-widest font-semibold">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-spin" style={{ animationDuration: "8s" }} />
+                    CAMPAÑA 52 AÑOS GRUPO TRITECH
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-                    Digita tu Frase o Comentario
+                  <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight font-sans">
+                    DIGITAR FRASE / CONCEPTO
                   </h3>
-                  <p className="text-slate-400 text-xs font-light">
-                    Escribe un mensaje, palabra o frase conmemorativa para dejar tu huella en los 52 años de Grupo Tritech.
+                  <p className="text-slate-400 text-xs font-light leading-relaxed">
+                    Escribe un mensaje o hito para ser integrado de forma inmediata al universo 3D interactivo.
                   </p>
                 </div>
 
-                {/* Field 1: Word or Phrase */}
+                {errorMessage && (
+                  <div className="p-3 rounded-xl bg-red-950/60 border border-red-500/50 text-red-300 text-xs font-mono">
+                    {errorMessage}
+                  </div>
+                )}
+
+                {/* Field 1: Message / Phrase */}
                 <div className="flex flex-col gap-1.5">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-mono uppercase tracking-wider text-slate-300 font-semibold">
-                      Tu Frase o Mensaje <span className="text-amber-400">*</span>
+                    <label className="text-xs font-mono uppercase tracking-wider text-cyan-300 font-semibold flex items-center gap-1.5">
+                      <MessageSquareQuote className="w-4 h-4 text-amber-400" />
+                      Mensaje / Frase <span className="text-amber-400">*</span>
                     </label>
-                    <span className="text-[10px] font-mono text-slate-500">{wordText.length}/45</span>
+                    <span className="text-[10px] font-mono text-slate-500">{message.length}/48</span>
                   </div>
                   <input
                     type="text"
                     required
-                    placeholder="Ej. 52 AÑOS DE ÉXITO TRITECH"
-                    value={wordText}
-                    onChange={handleWordChange}
-                    className="w-full px-4 py-3.5 rounded-xl bg-slate-950 border border-amber-500/60 text-amber-300 placeholder:text-slate-600 focus:outline-none focus:border-amber-400 text-sm sm:text-base font-extrabold uppercase tracking-wider transition-all shadow-inner"
+                    placeholder="Ej. 52 AÑOS LIDERANDO LA LUBRICACIÓN"
+                    value={message}
+                    onChange={handleMessageChange}
+                    className="w-full px-4 py-3.5 rounded-2xl bg-cyan-950/40 border border-cyan-400/40 text-amber-300 placeholder:text-slate-600 focus:outline-none focus:border-cyan-400 text-sm sm:text-base font-mono font-bold uppercase tracking-wider transition-all shadow-[inset_0_0_12px_rgba(6,182,212,0.15)]"
                   />
                 </div>
 
-                {/* Field 2: Name */}
-                <div className="flex flex-col gap-2">
-                  <label className="text-xs font-mono uppercase tracking-wider text-slate-300 flex items-center gap-2">
-                    <User className="w-4 h-4 text-blue-400" />
-                    Tu Nombre (Opcional)
+                {/* Field 2: Author / Team */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-mono uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                    <User className="w-4 h-4 text-cyan-400" />
+                    Autor / Equipo
                   </label>
                   <input
                     type="text"
-                    placeholder="Ej. Ing. Carlos Mendoza"
-                    value={authorName}
-                    onChange={(e) => setAuthorName(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder:text-slate-600 focus:outline-none focus:border-blue-500 text-sm transition-all"
+                    placeholder="Ej. Ing. Carlos Mendoza / Equipo Técnico"
+                    value={author}
+                    onChange={(e) => setAuthor(e.target.value)}
+                    className="w-full px-4 py-3 rounded-2xl bg-slate-900/60 border border-slate-700/60 text-white placeholder:text-slate-600 focus:outline-none focus:border-cyan-400 text-sm transition-all"
                   />
                 </div>
 
-                {/* Field 3: Country */}
-                <div className="flex flex-col gap-2">
-                  <label className="text-xs font-mono uppercase tracking-wider text-slate-300 flex items-center gap-2">
-                    <Globe className="w-4 h-4 text-amber-400" />
-                    País de Operación
+                {/* Field 3: Department / Plant */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-mono uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                    <Building2 className="w-4 h-4 text-emerald-400" />
+                    Departamento / Planta
                   </label>
-                  <select
-                    value={country}
-                    onChange={(e) => setCountry(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-blue-500 text-sm transition-all"
-                  >
-                    {countriesList.map((c) => (
-                      <option key={c} value={c}>
-                        {c}
-                      </option>
-                    ))}
-                  </select>
+                  <input
+                    type="text"
+                    placeholder="Ej. Operaciones Guatemala / Planta Escuintla"
+                    value={department}
+                    onChange={(e) => setDepartment(e.target.value)}
+                    className="w-full px-4 py-3 rounded-2xl bg-slate-900/60 border border-slate-700/60 text-white placeholder:text-slate-600 focus:outline-none focus:border-cyan-400 text-sm transition-all"
+                  />
                 </div>
 
-                {/* Submit Action */}
+                {/* Submit Action Button */}
                 <button
                   type="submit"
-                  className="mt-2 w-full py-4 px-6 rounded-xl bg-gradient-to-r from-blue-600 via-blue-500 to-amber-500 text-white font-bold text-xs uppercase tracking-wider shadow-xl shadow-blue-600/30 hover:scale-[1.01] active:scale-[0.99] transition-all"
+                  disabled={isSubmitting || !message.trim()}
+                  className="mt-2 w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs uppercase tracking-widest shadow-lg shadow-amber-500/25 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                 >
-                  Agregar al 52 Orbitante
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
+                      <span>REGISTRANDO EN BASE DE DATOS...</span>
+                    </>
+                  ) : (
+                    <span>AGREGAR AL 52 ORBITANTE</span>
+                  )}
                 </button>
-
               </form>
             )}
           </motion.div>

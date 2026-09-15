@@ -1,7 +1,7 @@
 "use client";
 
-import React, { Suspense, useState, useEffect } from "react";
-import { Canvas, useThree } from "@react-three/fiber";
+import React, { Suspense, useState, useEffect, useRef } from "react";
+import { Canvas, useThree, useFrame } from "@react-three/fiber";
 import { OrbitControls, PerspectiveCamera, Environment, Lightformer } from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import * as THREE from "three";
@@ -13,34 +13,55 @@ interface WordCloud52CanvasProps {
   onSelectWord: (word: TritechWord) => void;
   selectedWordId?: string;
   lastSubmittedWordId?: string;
+  powerUpTimestamp?: number;
 }
 
-function ResponsiveCameraController() {
+function CinematicIntroController({
+  onProgress,
+  onComplete,
+}: {
+  onProgress: (progress: number) => void;
+  onComplete: () => void;
+}) {
   const { camera, size } = useThree();
+  const startTimeRef = useRef<number | null>(null);
+  const completedRef = useRef(false);
 
-  useEffect(() => {
-    const aspect = size.width / size.height;
-    if (camera instanceof THREE.PerspectiveCamera) {
-      if (aspect < 0.75) {
-        // Narrow mobile portrait (iPhone / Android portrait) - Balanced zoom & milestone separation
-        camera.position.set(0, 0, 10.4);
-        camera.fov = 52;
-      } else if (aspect < 1.0) {
-        // Mobile / Tablet portrait
-        camera.position.set(0, 0, 10.6);
-        camera.fov = 49;
-      } else if (aspect < 1.3) {
-        // Small laptop / tablet landscape
-        camera.position.set(0, 0, 11.2);
-        camera.fov = 46;
-      } else {
-        // Desktop / 4K monitors
-        camera.position.set(0, 0, 10.8);
-        camera.fov = 45;
-      }
-      camera.updateProjectionMatrix();
+  useFrame((state) => {
+    if (completedRef.current) return;
+
+    if (startTimeRef.current === null) {
+      startTimeRef.current = state.clock.getElapsedTime();
     }
-  }, [camera, size]);
+
+    const elapsed = state.clock.getElapsedTime() - startTimeRef.current;
+    const duration = 2.5;
+    const progress = Math.min(1, elapsed / duration);
+    onProgress(progress);
+
+    const aspect = size.width / size.height;
+    const targetZ = aspect < 0.75 ? 16.2 : aspect < 1.0 ? 15.6 : 15.0;
+    const targetFov = aspect < 0.75 ? 58 : aspect < 1.0 ? 54 : 48;
+
+    if (elapsed < duration) {
+      // Ease-out cubic curve
+      const ease = 1 - Math.pow(1 - progress, 3);
+
+      camera.position.z = THREE.MathUtils.lerp(3.2, targetZ, ease);
+      if (camera instanceof THREE.PerspectiveCamera) {
+        camera.fov = targetFov;
+        camera.updateProjectionMatrix();
+      }
+    } else {
+      camera.position.z = targetZ;
+      if (camera instanceof THREE.PerspectiveCamera) {
+        camera.fov = targetFov;
+        camera.updateProjectionMatrix();
+      }
+      completedRef.current = true;
+      onComplete();
+    }
+  });
 
   return null;
 }
@@ -50,8 +71,11 @@ export function WordCloud52Canvas({
   onSelectWord,
   selectedWordId,
   lastSubmittedWordId,
+  powerUpTimestamp,
 }: WordCloud52CanvasProps) {
   const [mounted, setMounted] = useState(false);
+  const [introProgress, setIntroProgress] = useState(0);
+  const [introCompleted, setIntroCompleted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -77,8 +101,11 @@ export function WordCloud52Canvas({
         gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
         style={{ background: "transparent" }}
       >
-        <PerspectiveCamera makeDefault position={[0, 0, 11]} fov={45} />
-        <ResponsiveCameraController />
+        <PerspectiveCamera makeDefault position={[0, 0, 3.2]} fov={48} />
+        <CinematicIntroController
+          onProgress={setIntroProgress}
+          onComplete={() => setIntroCompleted(true)}
+        />
 
         {/* Ambient & Studio Directional Lights */}
         <ambientLight intensity={0.4} color="#0f172a" />
@@ -93,6 +120,8 @@ export function WordCloud52Canvas({
             onSelectWord={onSelectWord}
             selectedWordId={selectedWordId}
             lastSubmittedWordId={lastSubmittedWordId}
+            powerUpTimestamp={powerUpTimestamp}
+            introProgress={introProgress}
           />
           {/* 100% Offline Procedural Metallic Environment Map */}
           <Environment background={false}>
@@ -114,8 +143,9 @@ export function WordCloud52Canvas({
         </Suspense>
 
         <OrbitControls
+          enabled={introCompleted}
           enableZoom={true}
-          maxDistance={22}
+          maxDistance={24}
           minDistance={2.5}
           enablePan={false}
           rotateSpeed={0.6}

@@ -89,15 +89,23 @@ function WankelCinematicFlare() {
   );
 }
 
-export function Metallic52Core() {
+interface Metallic52CoreProps {
+  powerUpTimestamp?: number;
+  introProgress?: number;
+}
+
+export function Metallic52Core({ powerUpTimestamp, introProgress = 1 }: Metallic52CoreProps) {
   const { scene: scene52 } = useGLTF("/52year.glb");
   const { scene: sceneWankel } = useGLTF("/wankel.glb");
 
   const coreGroup = useRef<THREE.Group>(null);
+  const emblemGroupRef = useRef<THREE.Group>(null);
   const wankelRotorRef = useRef<THREE.Group>(null);
   const ringBlueRef = useRef<THREE.Group>(null);
   const ringGoldRef = useRef<THREE.Group>(null);
   const ringCyanRef = useRef<THREE.Group>(null);
+  const shockwaveRef = useRef<THREE.Mesh>(null);
+  const pointLightRef = useRef<THREE.PointLight>(null);
 
   useLayoutEffect(() => {
     if (scene52) {
@@ -147,32 +155,106 @@ export function Metallic52Core() {
     }
   }, [scene52, sceneWankel]);
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
     const t = state.clock.getElapsedTime();
+
+    // Calculate Power-Up Surge factor (3.5 second decay)
+    let surgeFactor = 0;
+    if (powerUpTimestamp) {
+      const elapsed = (Date.now() - powerUpTimestamp) / 1000;
+      if (elapsed < 3.5) {
+        surgeFactor = Math.pow(1 - elapsed / 3.5, 2);
+      }
+    }
 
     if (coreGroup.current) {
       coreGroup.current.rotation.y = Math.sin(t * 0.35) * 0.18 + state.pointer.x * 0.15;
       coreGroup.current.rotation.x = Math.cos(t * 0.25) * 0.08 - state.pointer.y * 0.1;
       coreGroup.current.position.y = Math.sin(t * 0.5) * 0.08;
+
+      // Scale bounce surge animation upon submission
+      const scaleBounce = 1.0 + Math.sin(surgeFactor * Math.PI) * 0.14;
+      coreGroup.current.scale.set(scaleBounce, scaleBounce, scaleBounce);
+    }
+
+    // Dynamic Chromatic Aura Loop for 52 Emblem
+    const waveCyanBlue = (Math.sin(t * 0.8) + 1) / 2;
+    const waveGold = (Math.sin(t * 0.4 + 1.2) + 1) / 2;
+    const colorCyan = new THREE.Color("#38bdf8");
+    const colorBlue = new THREE.Color("#2563eb");
+    const colorGold = new THREE.Color("#fbbf24");
+
+    const dynamicAuraColor = new THREE.Color()
+      .lerpColors(colorCyan, colorBlue, waveCyanBlue)
+      .lerp(colorGold, waveGold * 0.35);
+
+    // Apply Chromatic Aura to 52 Emblem Mesh Materials
+    if (scene52) {
+      const p = Math.min(1, Math.max(0, introProgress));
+      const ease = 1 - Math.pow(1 - p, 3);
+      const breathingPulse = 0.15 + Math.sin(t * 1.2) * 0.08;
+      const currentEmissiveIntensity = p < 1 ? THREE.MathUtils.lerp(2.5, 0.15, ease) : breathingPulse + surgeFactor * 1.5;
+
+      scene52.traverse((child) => {
+        if ((child as THREE.Mesh).isMesh && (child as THREE.Mesh).material) {
+          const mat = (child as THREE.Mesh).material as THREE.MeshPhysicalMaterial;
+          mat.emissive.copy(dynamicAuraColor);
+          mat.emissiveIntensity = currentEmissiveIntensity;
+        }
+      });
+    }
+
+    // Dynamic 52 Emblem Intro Insertion Animation
+    if (emblemGroupRef.current) {
+      const p = Math.min(1, Math.max(0, introProgress));
+      const ease = 1 - Math.pow(1 - p, 3); // Ease-out cubic curve
+
+      // Scale down from massive 2.8x down to locked 0.58
+      const currentScale = THREE.MathUtils.lerp(2.8, 0.58, ease);
+      emblemGroupRef.current.scale.set(currentScale, currentScale, currentScale);
+
+      // Z-position shifts back from 1.8 forward to locked 0.4
+      const currentZ = THREE.MathUtils.lerp(1.8, 0.4, ease);
+      emblemGroupRef.current.position.z = currentZ;
     }
 
     if (wankelRotorRef.current) {
-      wankelRotorRef.current.rotation.z = t * 0.35;
+      // Accelerate spin during power-up
+      const spinSpeed = 0.35 + surgeFactor * 2.5;
+      wankelRotorRef.current.rotation.z += delta * spinSpeed;
       wankelRotorRef.current.rotation.y = Math.sin(t * 0.2) * 0.1;
     }
 
+    // Synchronized Atmospheric Point Light Radiating Dynamic Color onto Wankel Core Surfaces
+    if (pointLightRef.current) {
+      const introGlow = introProgress < 1 ? (1 - introProgress) * 4.5 : 0;
+      pointLightRef.current.intensity = 1.2 + surgeFactor * 4.5 + introGlow + Math.sin(t * 0.8) * 0.3;
+      pointLightRef.current.color.copy(surgeFactor > 0.2 ? colorGold : dynamicAuraColor);
+    }
+
+    if (shockwaveRef.current) {
+      if (surgeFactor > 0.01) {
+        shockwaveRef.current.visible = true;
+        const scale = 1.0 + (1 - surgeFactor) * 4.8;
+        shockwaveRef.current.scale.set(scale, scale, scale);
+        (shockwaveRef.current.material as THREE.MeshBasicMaterial).opacity = surgeFactor * 0.75;
+      } else {
+        shockwaveRef.current.visible = false;
+      }
+    }
+
     if (ringBlueRef.current) {
-      ringBlueRef.current.rotation.z = t * 0.18;
+      ringBlueRef.current.rotation.z += delta * (0.18 + surgeFactor * 0.5);
       ringBlueRef.current.rotation.x = Math.sin(t * 0.1) * 0.15 + 0.2;
     }
 
     if (ringGoldRef.current) {
-      ringGoldRef.current.rotation.z = -t * 0.12;
+      ringGoldRef.current.rotation.z -= delta * (0.12 + surgeFactor * 0.4);
       ringGoldRef.current.rotation.y = Math.cos(t * 0.12) * 0.2 - 0.3;
     }
 
     if (ringCyanRef.current) {
-      ringCyanRef.current.rotation.z = t * 0.25;
+      ringCyanRef.current.rotation.z += delta * (0.25 + surgeFactor * 0.6);
     }
   });
 
@@ -182,6 +264,12 @@ export function Metallic52Core() {
       {/* Background Light Glow & Lens Flare */}
       <WankelCinematicFlare />
 
+      {/* Expanding Energy Power-Up Shockwave Mesh Ring */}
+      <mesh ref={shockwaveRef} rotation={[Math.PI / 2, 0, 0]} visible={false}>
+        <torusGeometry args={[1.5, 0.06, 16, 64]} />
+        <meshBasicMaterial color="#fbbf24" transparent opacity={0} blending={THREE.AdditiveBlending} />
+      </mesh>
+
       {/* 1. Official 3D Wankel Rotary Motor Center Frame */}
       <Float speed={1.2} rotationIntensity={0.1} floatIntensity={0.2}>
         <group ref={wankelRotorRef} scale={0.46} position={[0, 0, -0.25]}>
@@ -189,16 +277,16 @@ export function Metallic52Core() {
         </group>
       </Float>
 
-      {/* 2. Official "52" Model Emblem */}
+      {/* 2. Official "52" Model Emblem with Dynamic Intro Scale & Insertion */}
       <Float speed={1.4} rotationIntensity={0.08} floatIntensity={0.25}>
-        <group scale={0.58} position={[0, 0, 0.4]}>
+        <group ref={emblemGroupRef} scale={0.58} position={[0, 0, 0.4]}>
           <primitive object={scene52} />
         </group>
       </Float>
 
       {/* Dedicated Front Spotlight for 52 Emblem */}
       <directionalLight position={[0, 2, 6]} intensity={1.8} color="#ffffff" />
-      <pointLight position={[0, 0, 1.2]} intensity={1.0} color="#60a5fa" distance={5} />
+      <pointLight ref={pointLightRef} position={[0, 0, 1.2]} intensity={1.0} color="#60a5fa" distance={6} />
 
       {/* 3. Royal Blue Precision Orbital Ring */}
       <group ref={ringBlueRef} rotation={[0.25, 0, 0]}>

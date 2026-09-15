@@ -2,16 +2,19 @@
 
 import React, { useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Text, Float, Sparkles, Html } from "@react-three/drei";
+import { Float, Sparkles, Html } from "@react-three/drei";
 import * as THREE from "three";
 import { TritechWord } from "@/lib/wordList";
 import { Metallic52Core } from "./Metallic52Core";
+import { EnergyBeams } from "./EnergyBeams";
 
 interface OrbitingWords3DProps {
   words: TritechWord[];
   onSelectWord: (word: TritechWord) => void;
   selectedWordId?: string;
   lastSubmittedWordId?: string;
+  powerUpTimestamp?: number;
+  introProgress?: number;
 }
 
 interface WordCloudItemProps {
@@ -44,133 +47,82 @@ function WordCloudItem({
     }
   });
 
-  const textColor = isLastSubmitted ? "#fbbf24" : isFocused ? "#38bdf8" : word.color || "#ffffff";
-  const pillScale = isLastSubmitted ? (isFocused ? 1.35 : 1.2) : isFocused ? 1.3 : isDimmed ? 0.88 : 1.0;
-  const opacityFactor = isDimmed ? 0.3 : 1.0;
-  const pillWidth = Math.max(word.text.length * 0.11 + 0.36, 0.88);
-
-  // Check if text is numerical/code/metric to format with technical letterSpacing
-  const isTelemetry = /\d|\$|\+/.test(word.text) || Boolean(word.year);
-
   return (
-    <group
-      ref={textRef}
-      position={word.position}
-      scale={pillScale}
-      renderOrder={isLastSubmitted || isFocused ? 150 : 60}
-      onPointerOver={(e) => {
-        e.stopPropagation();
-        setHoveredId(word.id);
-        document.body.style.cursor = "pointer";
-      }}
-      onPointerOut={() => {
-        setHoveredId(null);
-        document.body.style.cursor = "auto";
-      }}
-      onClick={(e) => {
-        e.stopPropagation();
-        onSelect(word);
-      }}
-    >
-      {/* Floating Badge Tag for the Last Submitted Phrase */}
-      {isLastSubmitted && (
-        <group position={[0, 0.22, 0.02]} renderOrder={160}>
-          {/* Badge Background Mesh */}
-          <mesh position={[0, 0, -0.005]}>
-            <planeGeometry args={[1.3, 0.16]} />
-            <meshStandardMaterial
-              color="#451a03"
-              emissive="#d97706"
-              emissiveIntensity={1.4}
-              roughness={0.2}
-              metalness={0.9}
-              transparent
-              opacity={opacityFactor * 0.95}
-              depthTest={false}
-            />
-          </mesh>
-          {/* Badge Golden Border Line */}
-          <mesh position={[0, 0, -0.01]}>
-            <planeGeometry args={[1.34, 0.19]} />
-            <meshBasicMaterial color="#fbbf24" transparent opacity={opacityFactor} depthTest={false} />
-          </mesh>
-          {/* Badge Text */}
-          <Text
-            fontSize={0.064}
-            letterSpacing={0.06}
-            textAlign="center"
-            anchorX="center"
-            anchorY="middle"
-            position={[0, 0, 0.005]}
-            renderOrder={160}
-          >
-            ★ ÚLTIMA FRASE SUBIDA ★
-            <meshBasicMaterial color="#ffffff" transparent opacity={opacityFactor} depthTest={false} />
-          </Text>
-        </group>
-      )}
-
-      {/* Contrast Halo Backdrop Mesh */}
-      <mesh position={[0, 0, -0.025]}>
-        <planeGeometry args={[pillWidth + 0.35, 0.42]} />
-        <meshBasicMaterial color="#02040a" transparent opacity={opacityFactor * 0.75} depthTest={false} />
-      </mesh>
-
-      {/* 3D Glass Pill Backdrop Container Mesh (High-Opacity Dark Glass bg-black/90) */}
-      <mesh position={[0, 0, -0.015]}>
-        <planeGeometry args={[pillWidth, 0.22]} />
-        <meshStandardMaterial
-          color={isLastSubmitted ? "#1e1b4b" : isFocused ? "#0c1938" : "#030712"}
-          roughness={0.15}
-          metalness={0.95}
-          transparent
-          opacity={opacityFactor * (isLastSubmitted ? 0.98 : isFocused ? 0.95 : 0.9)}
-          depthTest={false}
-        />
-      </mesh>
-
-      {/* 3D Glass Pill Thin Cyan Border (border-cyan-500/30) */}
-      <mesh position={[0, 0, -0.02]}>
-        <planeGeometry args={[pillWidth + 0.03, 0.25]} />
-        <meshBasicMaterial
-          color={isLastSubmitted ? "#f59e0b" : isFocused ? "#38bdf8" : "#06b6d4"}
-          transparent
-          opacity={opacityFactor * (isLastSubmitted ? 1.0 : isFocused ? 0.95 : 0.4)}
-          depthTest={false}
-        />
-      </mesh>
-
-      {/* Swatch Color Bullet Sphere */}
-      <mesh position={[-pillWidth / 2 + 0.12, 0, 0]}>
-        <sphereGeometry args={[isLastSubmitted ? 0.042 : 0.032, 16, 16]} />
-        <meshBasicMaterial
-          color={isLastSubmitted ? "#fbbf24" : word.color || "#38bdf8"}
-          transparent
-          opacity={opacityFactor}
-          depthTest={false}
-        />
-      </mesh>
-
-      {/* 3D Concept Text with Sharp Drop Shadow Emissive Glow */}
-      <Text
-        fontSize={0.105}
-        letterSpacing={isTelemetry ? 0.08 : 0.04}
-        textAlign="left"
-        anchorX="center"
-        anchorY="middle"
-        position={[0.05, 0, 0]}
-        renderOrder={140}
+    <group ref={textRef} position={word.position}>
+      <Html
+        center
+        zIndexRange={[isFocused ? 100 : 50, 0]}
+        style={{
+          transformStyle: "preserve-3d",
+          backfaceVisibility: "hidden",
+          pointerEvents: "auto",
+        }}
       >
-        {word.text}
-        <meshStandardMaterial
-          color={textColor}
-          emissive={isLastSubmitted ? "#f59e0b" : isFocused ? "#38bdf8" : textColor === "#ffffff" ? "#1d4ed8" : textColor}
-          emissiveIntensity={isLastSubmitted ? 2.2 : isFocused ? 1.8 : opacityFactor * 0.7}
-          transparent
-          opacity={opacityFactor}
-          depthTest={false}
-        />
-      </Text>
+        {/* Outer Fixed Hit Box Area (Prevents Pointer Resizing Jitter) */}
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelect(word);
+          }}
+          onMouseEnter={(e) => {
+            e.stopPropagation();
+            setHoveredId(word.id);
+          }}
+          onMouseLeave={() => setHoveredId(null)}
+          className="p-2 -m-2 cursor-pointer select-none"
+        >
+          {/* Inner Scaling Visual Node with GPU Acceleration */}
+          <div
+            className={`relative group transform-gpu will-change-transform transition-all duration-300 ease-out flex items-center gap-1.5 ${
+              isDimmed
+                ? "opacity-20 scale-90"
+                : isFocused
+                ? "opacity-100 scale-110 z-50"
+                : "opacity-50 hover:opacity-100 hover:scale-105"
+            }`}
+          >
+            {/* Last Submitted Badge Tag */}
+            {isLastSubmitted && (
+              <div className="absolute -top-5 left-0 px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/60 text-amber-300 text-[8px] font-mono font-bold tracking-widest uppercase shadow-[0_0_10px_rgba(245,158,11,0.4)] whitespace-nowrap backdrop-blur-sm pointer-events-none">
+                ★ ÚLTIMA FRASE SUBIDA ★
+              </div>
+            )}
+
+            {/* Tiny Glowing Cyan Point Node */}
+            <span
+              className={`rounded-full shrink-0 transform-gpu transition-all duration-300 ${
+                isLastSubmitted
+                  ? "w-2.5 h-2.5 bg-amber-400 shadow-[0_0_12px_#fbbf24]"
+                  : isFocused
+                  ? "w-2.5 h-2.5 bg-cyan-300 shadow-[0_0_14px_#38bdf8]"
+                  : "w-2 h-2 bg-cyan-400 shadow-[0_0_8px_#38bdf8] group-hover:scale-125"
+              }`}
+              style={{
+                backgroundColor: isLastSubmitted ? "#fbbf24" : word.color || "#38bdf8",
+                boxShadow: isFocused
+                  ? `0 0 14px ${isLastSubmitted ? "#fbbf24" : word.color || "#38bdf8"}`
+                  : `0 0 8px ${word.color || "#38bdf8"}80`,
+              }}
+            />
+
+            {/* Ultra-Thin Semi-Transparent Tech Line Connector */}
+            <span className="w-4 border-t border-cyan-400/40 opacity-50 group-hover:opacity-100 group-hover:w-6 group-hover:border-cyan-400/80 transition-all shrink-0" />
+
+            {/* Clean White Sci-Fi Floating Typography */}
+            <span
+              className={`font-mono text-xs tracking-wider whitespace-nowrap transition-all duration-300 ${
+                isLastSubmitted
+                  ? "text-amber-200 font-bold"
+                  : isFocused
+                  ? "text-cyan-50 font-bold text-shadow-[0_0_10px_rgba(56,189,248,0.7)]"
+                  : "text-white/80 font-medium group-hover:text-white"
+              }`}
+            >
+              {word.text}
+            </span>
+          </div>
+        </div>
+      </Html>
     </group>
   );
 }
@@ -180,6 +132,8 @@ export function OrbitingWords3D({
   onSelectWord,
   selectedWordId,
   lastSubmittedWordId,
+  powerUpTimestamp,
+  introProgress,
 }: OrbitingWords3DProps) {
   const orbitGroupRef = useRef<THREE.Group>(null);
   const starFarRef = useRef<THREE.Group>(null);
@@ -219,24 +173,31 @@ export function OrbitingWords3D({
 
   return (
     <group scale={scaleFactor}>
-      {/* Central Metallic Extruded "52" Emblem Core */}
-      <Metallic52Core />
+      {/* Central Metallic Extruded "52" Emblem Core with Power-Up Reaction */}
+      <Metallic52Core powerUpTimestamp={powerUpTimestamp} introProgress={introProgress} />
 
       {/* 1. Deep Background Starfield Layer (Slow Cyan Orbit) */}
       <group ref={starFarRef}>
-        <Sparkles count={260} scale={24} size={4.0} speed={0.15} opacity={0.7} color="#38bdf8" />
+        <Sparkles count={260} scale={28} size={4.0} speed={0.15} opacity={0.7} color="#38bdf8" />
       </group>
 
       {/* 2. Midground Starfield Layer (Medium Emerald Green Orbit) */}
       <group ref={starMidRef}>
-        <Sparkles count={180} scale={18} size={3.2} speed={0.25} opacity={0.8} color="#52b788" />
+        <Sparkles count={180} scale={20} size={3.2} speed={0.25} opacity={0.8} color="#52b788" />
       </group>
 
       {/* 3. Foreground Dust Starfield Layer (Fast Gold & White Dust) */}
       <group ref={starNearRef}>
-        <Sparkles count={100} scale={12} size={2.5} speed={0.35} opacity={0.9} color="#fbbf24" />
-        <Sparkles count={60} scale={10} size={2.0} speed={0.4} opacity={0.85} color="#ffffff" />
+        <Sparkles count={100} scale={14} size={2.5} speed={0.35} opacity={0.9} color="#fbbf24" />
+        <Sparkles count={60} scale={12} size={2.0} speed={0.4} opacity={0.85} color="#ffffff" />
       </group>
+
+      {/* Dynamic Laser Energy Beams Inward to Core */}
+      <EnergyBeams
+        words={words}
+        activeFocusId={activeFocusId}
+        lastSubmittedWordId={lastSubmittedWordId}
+      />
 
       {/* Orbiting 3D Historical Word Constellation */}
       <group ref={orbitGroupRef}>
