@@ -295,11 +295,11 @@ function generateHistorical52Constellation(): TritechWord[] {
   const middleCount = 10;
   const outerCount = totalItems - innerCount - middleCount; // 10
 
-  // 1. Inner Ring (Radius 5.2) - Airy spatial clearance around central core
+  // 1. Inner Ring (Radius 6.4) - Generous spatial clearance around central core
   for (let i = 0; i < innerCount; i++) {
     const item = HISTORICAL_TRITECH_DATA[i];
     const angle = (i / innerCount) * Math.PI * 2;
-    const radius = 5.2;
+    const radius = 6.4;
     const x = Math.cos(angle) * radius;
     const y = Math.sin(angle) * radius * 0.7;
     const z = Math.sin(angle * 2) * 1.5;
@@ -312,11 +312,11 @@ function generateHistorical52Constellation(): TritechWord[] {
     });
   }
 
-  // 2. Middle Ring (Radius 7.8)
+  // 2. Middle Ring (Radius 9.0)
   for (let i = 0; i < middleCount; i++) {
     const item = HISTORICAL_TRITECH_DATA[innerCount + i];
     const angle = (i / middleCount) * Math.PI * 2 + 0.35;
-    const radius = 7.8;
+    const radius = 9.0;
     const x = Math.cos(angle) * radius;
     const y = Math.sin(angle) * radius * 0.75;
     const z = Math.cos(angle * 2) * 2.0;
@@ -329,11 +329,11 @@ function generateHistorical52Constellation(): TritechWord[] {
     });
   }
 
-  // 3. Outer Ring (Radius 10.5)
+  // 3. Outer Ring (Radius 11.8)
   for (let i = 0; i < outerCount; i++) {
     const item = HISTORICAL_TRITECH_DATA[innerCount + middleCount + i];
     const angle = (i / outerCount) * Math.PI * 2 + 0.65;
-    const radius = 10.5;
+    const radius = 11.8;
     const x = Math.cos(angle) * radius;
     const y = Math.sin(angle) * radius * 0.8;
     const z = Math.sin(angle * 3) * 2.4;

@@ -154,14 +154,14 @@ export function OrbitingWords3D({
     }
 
     if (orbitGroupRef.current) {
-      // Serene, smooth gravitational orbital rotation
-      orbitGroupRef.current.rotation.y = t * 0.025 + state.pointer.x * 0.05;
-      orbitGroupRef.current.rotation.x = Math.sin(t * 0.02) * 0.04 - state.pointer.y * 0.04;
+      // Serene, tranquil orbital rotation
+      orbitGroupRef.current.rotation.y = t * 0.015 + state.pointer.x * 0.03;
+      orbitGroupRef.current.rotation.x = Math.sin(t * 0.015) * 0.03 - state.pointer.y * 0.03;
     }
 
-    // Ultra-Slow Parallax Background Starfield
+    // Ultra-slow background starfield drift
     if (starFarRef.current) {
-      starFarRef.current.rotation.y = -t * 0.008;
+      starFarRef.current.rotation.y = -t * 0.004;
     }
   });
 
@@ -170,14 +170,15 @@ export function OrbitingWords3D({
       {/* Central Metallic Extruded "52" Emblem Core with Power-Up Reaction */}
       <Metallic52Core powerUpTimestamp={powerUpTimestamp} introProgress={introProgress} />
 
-      {/* 2050.earth Atmospheric Volumetric Star Dust Layers (Tritech Cyan & Emerald) */}
+      {/* Atmospheric Soft Star Dust Layers (Subtle, Non-Distracting) */}
       <group ref={starFarRef}>
-        <Sparkles count={65} scale={28} size={1.8} speed={0.03} opacity={0.35} color="#38bdf8" />
-        <Sparkles count={45} scale={20} size={1.4} speed={0.02} opacity={0.25} color="#52b788" />
+        <Sparkles count={20} scale={34} size={1.2} speed={0.01} opacity={0.18} color="#38bdf8" />
+        <Sparkles count={12} scale={24} size={1.0} speed={0.01} opacity={0.15} color="#52b788" />
       </group>
 
+
       {/* Particle Love-inspired Interactive GPU Oil Fluid Particle Cloud */}
-      <InteractiveOilParticles powerUpTimestamp={powerUpTimestamp} count={1800} />
+      <InteractiveOilParticles powerUpTimestamp={powerUpTimestamp} count={550} />
 
       {/* Dynamic Laser Energy Beams Inward to Core */}
       <EnergyBeams

@@ -21,39 +21,39 @@ void main() {
 
   vec3 pos = position;
 
-  // Swirling viscous orbit around central Y axis
-  float angle = uTime * aSpeed * 0.35 + aPhase;
+  // Gentle, serene swirl orbit around central Y axis
+  float angle = uTime * aSpeed * 0.12 + aPhase;
   float cosA = cos(angle);
   float sinA = sin(angle);
 
   vec3 rotatedPos;
   rotatedPos.x = pos.x * cosA - pos.z * sinA;
   rotatedPos.z = pos.x * sinA + pos.z * cosA;
-  rotatedPos.y = pos.y + sin(uTime * aSpeed * 0.8 + aPhase) * 0.35;
+  rotatedPos.y = pos.y + sin(uTime * aSpeed * 0.3 + aPhase) * 0.25;
 
-  // Magnetic mouse interaction field
+  // Subtle magnetic mouse interaction field
   vec3 distVec = rotatedPos - uMouse;
   float dist = length(distVec);
-  if (dist < 3.8 && dist > 0.001) {
-    float force = (1.0 - dist / 3.8);
-    rotatedPos += normalize(distVec) * force * 1.1;
+  if (dist < 4.0 && dist > 0.001) {
+    float force = (1.0 - dist / 4.0);
+    rotatedPos += normalize(distVec) * force * 0.6;
   }
 
   // Kinetic submission surge shockwave
   if (uSurge > 0.001) {
     vec3 radial = normalize(rotatedPos);
     float wave = sin(uSurge * 3.14159);
-    rotatedPos += radial * wave * (2.2 + aPhase * 1.2);
+    rotatedPos += radial * wave * (1.8 + aPhase * 0.8);
   }
 
   vec4 mvPosition = modelViewMatrix * vec4(rotatedPos, 1.0);
   gl_Position = projectionMatrix * mvPosition;
 
-  // Size attenuation
-  gl_PointSize = aScale * (160.0 / -mvPosition.z) * (1.0 + uSurge * 0.6);
+  // Soft, non-glaring size attenuation
+  gl_PointSize = aScale * (90.0 / -mvPosition.z) * (1.0 + uSurge * 0.4);
 
-  // Smooth edge fading
-  vAlpha = smoothstep(22.0, 3.5, length(rotatedPos)) * 0.7;
+  // Soft edge fading with low maximum opacity (0.35 max) for breathable elegance
+  vAlpha = smoothstep(26.0, 5.0, length(rotatedPos)) * 0.35;
 }
 `;
 
@@ -79,7 +79,7 @@ interface InteractiveOilParticlesProps {
 
 export function InteractiveOilParticles({
   powerUpTimestamp,
-  count = 1800,
+  count = 550, // Reduced by 70% from 1800 for pristine clarity
 }: InteractiveOilParticlesProps) {
   const pointsRef = useRef<THREE.Points>(null);
 
@@ -105,17 +105,15 @@ export function InteractiveOilParticles({
     const whiteColor = new THREE.Color("#ffffff");
 
     for (let i = 0; i < count; i++) {
-      // Distribute particles in a volumetric donut / sphere field around core
-      const radius = THREE.MathUtils.lerp(1.8, 9.5, Math.pow(Math.random(), 0.7));
+      // Disperse particles in an expanded, breathable volumetric ring field away from central core
+      const radius = THREE.MathUtils.lerp(3.8, 13.5, Math.pow(Math.random(), 0.6));
       const theta = Math.random() * Math.PI * 2;
-      const phi = (Math.random() - 0.5) * Math.PI * 0.6;
+      const phi = (Math.random() - 0.5) * Math.PI * 0.5;
 
       positions[i * 3] = radius * Math.cos(theta) * Math.cos(phi);
-      positions[i * 3 + 1] = radius * Math.sin(phi) * 1.2;
+      positions[i * 3 + 1] = radius * Math.sin(phi) * 1.1;
       positions[i * 3 + 2] = radius * Math.sin(theta) * Math.cos(phi);
 
-      // Color distribution strictly aligned with Tritech corporate palette:
-      // 55% Electric Blue & Cyan, 35% Emerald Green, 10% Crisp White Highlights
       const randColor = Math.random();
       const c =
         randColor < 0.35
@@ -132,8 +130,8 @@ export function InteractiveOilParticles({
       colors[i * 3 + 1] = c.g;
       colors[i * 3 + 2] = c.b;
 
-      scales[i] = THREE.MathUtils.lerp(0.4, 1.3, Math.random());
-      speeds[i] = THREE.MathUtils.lerp(0.6, 1.8, Math.random());
+      scales[i] = THREE.MathUtils.lerp(0.35, 1.0, Math.random());
+      speeds[i] = THREE.MathUtils.lerp(0.15, 0.5, Math.random()); // Slow, tranquil floating speed
       phases[i] = Math.random() * Math.PI * 2;
     }
 
@@ -159,7 +157,6 @@ export function InteractiveOilParticles({
     const t = state.clock.getElapsedTime();
     uniformsRef.current.uTime.value = t;
 
-    // Surge decay calculation
     let surgeFactor = 0;
     if (powerUpTimestamp) {
       const elapsed = (Date.now() - powerUpTimestamp) / 1000;
@@ -175,7 +172,6 @@ export function InteractiveOilParticles({
       delta
     );
 
-    // Map pointer coordinates to 3D world space for mouse interaction
     const pointer3D = new THREE.Vector3(
       (state.pointer.x * state.viewport.width) / 2,
       (state.pointer.y * state.viewport.height) / 2,
@@ -187,3 +183,4 @@ export function InteractiveOilParticles({
 
   return <points ref={pointsRef} geometry={geometry} material={shaderMaterial} />;
 }
+

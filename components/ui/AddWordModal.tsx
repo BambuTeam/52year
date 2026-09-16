@@ -58,8 +58,8 @@ export function AddWordModal({ isOpen, onClose, onAddWord }: AddWordModalProps) 
         author: createdPhrase.author,
         plant: createdPhrase.department,
         country: createdPhrase.country,
-        position: createdPhrase.position,
-        color: createdPhrase.color || "#38bdf8",
+        position: createdPhrase.position && Array.isArray(createdPhrase.position) && createdPhrase.position.length === 3 ? createdPhrase.position : [7.2, 1.8, 0.5],
+        color: createdPhrase.color || "#52b788",
         isCustom: true,
       };
 

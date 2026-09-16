@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { WordCloud52Canvas } from "@/components/3d/WordCloud52Canvas";
 import { HUDOverlay } from "@/components/ui/HUDOverlay";
 import { AddWordModal } from "@/components/ui/AddWordModal";
@@ -17,47 +17,59 @@ export default function Home() {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
 
+  const fetchBackendPhrases = useCallback(async () => {
+    try {
+      const res = await fetch("/api/phrases?t=" + Date.now());
+      const data = await res.json();
+      if (data.success && Array.isArray(data.phrases)) {
+        const dbWords: TritechWord[] = data.phrases.map((p: any) => ({
+          id: p.id,
+          text: p.text,
+          author: p.author,
+          plant: p.department,
+          country: p.country,
+          position: p.position && Array.isArray(p.position) && p.position.length === 3 ? p.position : [7.2, 1.8, 0.5],
+          color: p.color || "#52b788",
+          isCustom: true,
+        }));
+
+        setWords((prev) => {
+          const staticWords = prev.filter((w) => !w.isCustom);
+          const dbIds = new Set(dbWords.map((w) => w.id));
+          const localOnlyCustom = prev.filter((w) => w.isCustom && !dbIds.has(w.id));
+          return [...localOnlyCustom, ...dbWords, ...staticWords];
+        });
+      }
+    } catch (e) {
+      console.error("Error fetching database phrases:", e);
+    }
+  }, []);
+
   // Load persistent user-contributed words from database API on mount
   useEffect(() => {
-    async function loadBackendPhrases() {
-      try {
-        const res = await fetch("/api/phrases");
-        const data = await res.json();
-        if (data.success && Array.isArray(data.phrases)) {
-          const dbWords: TritechWord[] = data.phrases.map((p: any) => ({
-            id: p.id,
-            text: p.text,
-            author: p.author,
-            plant: p.department,
-            country: p.country,
-            position: p.position,
-            color: p.color || "#f59e0b",
-            isCustom: true,
-          }));
-
-          setWords((prev) => {
-            const staticOnly = prev.filter((w) => !w.isCustom);
-            return [...dbWords, ...staticOnly];
-          });
-        }
-      } catch (e) {
-        console.error("Error fetching database phrases:", e);
-      }
-    }
-
-    loadBackendPhrases();
-  }, []);
+    fetchBackendPhrases();
+  }, [fetchBackendPhrases]);
 
   const handleSelectWord = (word: TritechWord) => {
     setSelectedWord(word);
   };
 
-  const handleAddWord = (newWordObj: TritechWord) => {
-    setWords((prev) => [newWordObj, ...prev.filter((w) => w.id !== newWordObj.id)]);
-    setSelectedWord(newWordObj);
-    setLastSubmittedWordId(newWordObj.id);
-    setPowerUpTimestamp(Date.now()); // Trigger 3.5s Wankel Core Power-Up Surge!
-  };
+  const handleAddWord = useCallback(
+    (newWordObj: TritechWord) => {
+      // Instantly prepend newly submitted phrase to 3D orbit
+      setWords((prev) => [newWordObj, ...prev.filter((w) => w.id !== newWordObj.id)]);
+      setSelectedWord(newWordObj);
+      setLastSubmittedWordId(newWordObj.id);
+      setPowerUpTimestamp(Date.now()); // Trigger 3.5s Wankel Core Power-Up Surge!
+
+      // Synchronize with database API immediately
+      setTimeout(() => {
+        fetchBackendPhrases();
+      }, 400);
+    },
+    [fetchBackendPhrases]
+  );
+
 
   const handleResetSelection = () => {
     setSelectedWord(null);

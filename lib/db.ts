@@ -94,10 +94,10 @@ export function addPhrase(data: {
 }): SubmittedPhrase {
   const all = getAllPhrases();
 
-  // Generate random spatial coordinates in outer orbital ring
+  // Generate random spatial coordinates in outer orbital ring (Spacious clearance around core)
   const angle = Math.random() * Math.PI * 2;
-  const radius = 4.2 + Math.random() * 2.2;
-  const z = (Math.random() - 0.5) * 2.4;
+  const radius = 6.8 + Math.random() * 3.7;
+  const z = (Math.random() - 0.5) * 2.8;
 
   const newPhrase: SubmittedPhrase = {
     id: `custom-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
