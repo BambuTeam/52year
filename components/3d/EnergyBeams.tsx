@@ -51,9 +51,9 @@ function BeamItem({ startPos, color, isHighIntensity }: BeamItemProps) {
           new THREE.Line(
             geometry,
             new THREE.LineBasicMaterial({
-              color: isHighIntensity ? "#fbbf24" : color || "#38bdf8",
+              color: isHighIntensity ? "#52b788" : color || "#38bdf8",
               transparent: true,
-              opacity: isHighIntensity ? 0.85 : 0.45,
+              opacity: isHighIntensity ? 0.9 : 0.45,
               blending: THREE.AdditiveBlending,
               linewidth: 1.5,
             })
@@ -66,7 +66,7 @@ function BeamItem({ startPos, color, isHighIntensity }: BeamItemProps) {
       <mesh ref={particleMeshRef}>
         <sphereGeometry args={[isHighIntensity ? 0.08 : 0.045, 12, 12]} />
         <meshBasicMaterial
-          color={isHighIntensity ? "#fbbf24" : "#38bdf8"}
+          color={isHighIntensity ? "#52b788" : "#38bdf8"}
           transparent
           opacity={0.9}
           blending={THREE.AdditiveBlending}

@@ -98,10 +98,11 @@ export function InteractiveOilParticles({
     const speeds = new Float32Array(count);
     const phases = new Float32Array(count);
 
-    const amberColor = new THREE.Color("#f59e0b");
-    const goldColor = new THREE.Color("#fbbf24");
-    const cyanColor = new THREE.Color("#38bdf8");
-    const tealColor = new THREE.Color("#06b6d4");
+    const royalBlue = new THREE.Color("#2563eb");
+    const cyanBlue = new THREE.Color("#38bdf8");
+    const emeraldColor = new THREE.Color("#52b788");
+    const greenColor = new THREE.Color("#10b981");
+    const whiteColor = new THREE.Color("#ffffff");
 
     for (let i = 0; i < count; i++) {
       // Distribute particles in a volumetric donut / sphere field around core
@@ -113,11 +114,19 @@ export function InteractiveOilParticles({
       positions[i * 3 + 1] = radius * Math.sin(phi) * 1.2;
       positions[i * 3 + 2] = radius * Math.sin(theta) * Math.cos(phi);
 
-      // Color mix: 60% amber-gold oil, 40% cyan-teal sparks
-      const isAmber = Math.random() > 0.4;
-      const c = isAmber
-        ? (Math.random() > 0.5 ? amberColor : goldColor)
-        : (Math.random() > 0.5 ? cyanColor : tealColor);
+      // Color distribution strictly aligned with Tritech corporate palette:
+      // 55% Electric Blue & Cyan, 35% Emerald Green, 10% Crisp White Highlights
+      const randColor = Math.random();
+      const c =
+        randColor < 0.35
+          ? royalBlue
+          : randColor < 0.55
+          ? cyanBlue
+          : randColor < 0.75
+          ? emeraldColor
+          : randColor < 0.9
+          ? greenColor
+          : whiteColor;
 
       colors[i * 3] = c.r;
       colors[i * 3 + 1] = c.g;

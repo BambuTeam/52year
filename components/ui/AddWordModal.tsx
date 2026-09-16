@@ -59,7 +59,7 @@ export function AddWordModal({ isOpen, onClose, onAddWord }: AddWordModalProps) 
         plant: createdPhrase.department,
         country: createdPhrase.country,
         position: createdPhrase.position,
-        color: createdPhrase.color || "#f59e0b",
+        color: createdPhrase.color || "#38bdf8",
         isCustom: true,
       };
 
@@ -135,14 +135,14 @@ export function AddWordModal({ isOpen, onClose, onAddWord }: AddWordModalProps) 
                   ¡Frase Registrada en la Galaxia!
                 </h3>
                 <p className="text-slate-300 text-xs sm:text-sm leading-relaxed max-w-xs font-mono">
-                  Tu mensaje <strong className="text-amber-400 font-bold">&ldquo;{message}&rdquo;</strong> se guardó exitosamente y ya orbita con la insignia dorada.
+                  Tu mensaje <strong className="text-cyan-300 font-bold">&ldquo;{message}&rdquo;</strong> se guardó exitosamente y ya orbita con la insignia del 52 Aniversario.
                 </p>
               </motion.div>
             ) : (
               <form onSubmit={handleSubmit} className="flex flex-col gap-4 sm:gap-5">
                 <div className="flex flex-col gap-1">
                   <div className="inline-flex items-center gap-2 text-[10px] sm:text-xs font-mono text-cyan-400 uppercase tracking-widest font-semibold">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-spin" style={{ animationDuration: "8s" }} />
+                    <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-spin" style={{ animationDuration: "8s" }} />
                     CAMPAÑA 52 AÑOS GRUPO TRITECH
                   </div>
                   <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight font-sans">
@@ -163,8 +163,8 @@ export function AddWordModal({ isOpen, onClose, onAddWord }: AddWordModalProps) 
                 <div className="flex flex-col gap-1.5">
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-mono uppercase tracking-wider text-cyan-300 font-semibold flex items-center gap-1.5">
-                      <MessageSquareQuote className="w-4 h-4 text-amber-400" />
-                      Mensaje / Frase <span className="text-amber-400">*</span>
+                      <MessageSquareQuote className="w-4 h-4 text-cyan-400" />
+                      Mensaje / Frase <span className="text-cyan-400">*</span>
                     </label>
                     <span className="text-[10px] font-mono text-slate-500">{message.length}/48</span>
                   </div>
@@ -174,7 +174,7 @@ export function AddWordModal({ isOpen, onClose, onAddWord }: AddWordModalProps) 
                     placeholder="Ej. 52 AÑOS LIDERANDO LA LUBRICACIÓN"
                     value={message}
                     onChange={handleMessageChange}
-                    className="w-full px-4 py-3.5 rounded-2xl bg-cyan-950/40 border border-cyan-400/40 text-amber-300 placeholder:text-slate-600 focus:outline-none focus:border-cyan-400 text-sm sm:text-base font-mono font-bold uppercase tracking-wider transition-all shadow-[inset_0_0_12px_rgba(6,182,212,0.15)]"
+                    className="w-full px-4 py-3.5 rounded-2xl bg-cyan-950/40 border border-cyan-400/40 text-cyan-200 placeholder:text-slate-600 focus:outline-none focus:border-cyan-400 text-sm sm:text-base font-mono font-bold uppercase tracking-wider transition-all shadow-[inset_0_0_12px_rgba(6,182,212,0.15)]"
                   />
                 </div>
 
@@ -212,11 +212,11 @@ export function AddWordModal({ isOpen, onClose, onAddWord }: AddWordModalProps) 
                 <button
                   type="submit"
                   disabled={isSubmitting || !message.trim()}
-                  className="mt-2 w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs uppercase tracking-widest shadow-lg shadow-amber-500/25 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="mt-2 w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-blue-600 via-blue-500 to-emerald-500 hover:from-blue-500 hover:to-emerald-400 text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-600/30 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
+                      <Loader2 className="w-4 h-4 animate-spin text-white" />
                       <span>REGISTRANDO EN BASE DE DATOS...</span>
                     </>
                   ) : (

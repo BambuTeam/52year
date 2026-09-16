@@ -49,7 +49,7 @@ export function HUDOverlay({
               52 AÑOS DE HISTORIA
               <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_#38bdf8]" />
             </span>
-            <span className="text-[9px] sm:text-[10px] text-amber-400 font-mono tracking-widest uppercase font-bold">
+            <span className="text-[9px] sm:text-[10px] text-emerald-400 font-mono tracking-widest uppercase font-bold">
               1974 - 2026
             </span>
           </div>
@@ -57,10 +57,10 @@ export function HUDOverlay({
 
         {/* Top-Right: Counter Pill */}
         <div className="pointer-events-auto flex items-center gap-1.5 sm:gap-2 backdrop-blur-xl bg-slate-950/80 border border-slate-800 rounded-2xl px-3 py-2 sm:px-4 sm:py-2.5 shadow-2xl">
-          <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 animate-spin" style={{ animationDuration: "10s" }} />
+          <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400 animate-spin" style={{ animationDuration: "10s" }} />
           <span className="text-[10px] sm:text-xs font-mono text-slate-300">
             <span className="hidden xs:inline">CONCEPTOS 3D:</span>
-            <strong className="text-amber-400 text-xs sm:text-sm ml-1 font-mono font-extrabold">{wordCount}</strong>
+            <strong className="text-cyan-300 text-xs sm:text-sm ml-1 font-mono font-extrabold">{wordCount}</strong>
           </span>
         </div>
       </div>
@@ -93,18 +93,18 @@ export function HUDOverlay({
             </div>
 
             {selectedWord.year ? (
-              <span className="px-2 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[9px] sm:text-[10px] font-mono font-bold flex items-center gap-1 shrink-0">
+              <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[9px] sm:text-[10px] font-mono font-bold flex items-center gap-1 shrink-0">
                 <Calendar className="w-3 h-3" />
                 {selectedWord.year}
               </span>
             ) : selectedWord.id === lastSubmittedWordId ? (
-              <span className="px-2 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/50 text-amber-400 text-[9px] sm:text-[10px] font-mono font-bold shrink-0">
+              <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-500/50 text-emerald-400 text-[9px] sm:text-[10px] font-mono font-bold shrink-0">
                 NUEVO APORTE
               </span>
             ) : null}
           </div>
 
-          <div className="text-xl sm:text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-200 to-amber-300 uppercase tracking-wider leading-tight">
+          <div className="text-xl sm:text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-200 to-emerald-300 uppercase tracking-wider leading-tight">
             &ldquo;{selectedWord.text}&rdquo;
           </div>
 
@@ -153,12 +153,12 @@ export function HUDOverlay({
         <button
           onClick={handleOpenAdd}
           disabled={isLoadingAdd}
-          className="flex-1 sm:flex-initial px-5 sm:px-7 py-3 sm:py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all ring-2 ring-amber-400/40 relative overflow-hidden"
+          className="flex-1 sm:flex-initial px-5 sm:px-7 py-3 sm:py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-blue-500 to-emerald-500 hover:from-blue-500 hover:to-emerald-400 text-white font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all ring-2 ring-cyan-400/40 relative overflow-hidden"
         >
           {isLoadingAdd ? (
-            <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
           ) : (
-            <PlusCircle className="w-4 h-4 text-slate-950 stroke-[2.5]" />
+            <PlusCircle className="w-4 h-4 text-white stroke-[2.5]" />
           )}
           <span className="whitespace-nowrap">DIGITAR FRASE</span>
         </button>

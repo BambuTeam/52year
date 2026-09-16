@@ -35,7 +35,7 @@ function CinematicIntroController({
     }
 
     const elapsed = state.clock.getElapsedTime() - startTimeRef.current;
-    const duration = 2.5;
+    const duration = 4.8; // 4.8-second Hollywood-style slow cinematic zoom-out
     const progress = Math.min(1, elapsed / duration);
     onProgress(progress);
 
@@ -44,10 +44,10 @@ function CinematicIntroController({
     const targetFov = aspect < 0.75 ? 58 : aspect < 1.0 ? 54 : 48;
 
     if (elapsed < duration) {
-      // Ease-out cubic curve
+      // Buttery-smooth ease-out cubic curve
       const ease = 1 - Math.pow(1 - progress, 3);
 
-      camera.position.z = THREE.MathUtils.lerp(3.2, targetZ, ease);
+      camera.position.z = THREE.MathUtils.lerp(4.5, targetZ, ease);
       if (camera instanceof THREE.PerspectiveCamera) {
         camera.fov = targetFov;
         camera.updateProjectionMatrix();
@@ -122,7 +122,7 @@ export function WordCloud52Canvas({
         gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
         style={{ background: "transparent" }}
       >
-        <PerspectiveCamera makeDefault position={[0, 0, 3.2]} fov={48} />
+        <PerspectiveCamera makeDefault position={[0, 0, 4.5]} fov={48} />
         <CinematicIntroController
           onProgress={setIntroProgress}
           onComplete={() => setIntroCompleted(true)}

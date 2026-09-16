@@ -30,7 +30,7 @@ export function ShareSnapshotModal({ isOpen, onClose, selectedWord }: ShareSnaps
         particleCount: 80,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ["#2563eb", "#f59e0b", "#10b981", "#38bdf8"],
+        colors: ["#2563eb", "#09402c", "#10b981", "#38bdf8"],
       });
 
       const dataUrl = await toPng(cardRef.current, {
@@ -96,7 +96,7 @@ export function ShareSnapshotModal({ isOpen, onClose, selectedWord }: ShareSnaps
             </button>
 
             <div className="text-center flex flex-col gap-1">
-              <span className="text-[10px] font-mono text-amber-400 uppercase tracking-widest flex items-center justify-center gap-1">
+              <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-widest flex items-center justify-center gap-1">
                 <Sparkles className="w-3.5 h-3.5" />
                 TARJETA CONMEMORATIVA TRITECH 52
               </span>
@@ -141,7 +141,7 @@ export function ShareSnapshotModal({ isOpen, onClose, selectedWord }: ShareSnaps
 
               {/* Background Glow Orbs */}
               <div className="absolute -top-20 -right-20 w-44 h-44 bg-blue-600/25 rounded-full blur-3xl pointer-events-none" />
-              <div className="absolute -bottom-20 -left-20 w-44 h-44 bg-amber-500/20 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-20 -left-20 w-44 h-44 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
 
               {/* Card Header */}
               <div className="relative z-10 flex items-center justify-between border-b border-slate-800/90 pb-3">
@@ -153,19 +153,19 @@ export function ShareSnapshotModal({ isOpen, onClose, selectedWord }: ShareSnaps
                   />
                 </div>
 
-                <div className="px-2.5 py-1 rounded-md bg-amber-500/10 border border-amber-500/40 text-[9px] font-mono text-amber-300 font-bold flex items-center gap-1.5">
-                  <Shield className="w-3 h-3 text-amber-400" />
+                <div className="px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/40 text-[9px] font-mono text-emerald-300 font-bold flex items-center gap-1.5">
+                  <Shield className="w-3 h-3 text-emerald-400" />
                   <span>1974 - 2026</span>
                 </div>
               </div>
 
               {/* Center Highlighted Concept */}
               <div className="relative z-10 my-auto text-center flex flex-col gap-2.5 py-4">
-                <span className="text-[9px] font-mono text-amber-400 uppercase tracking-widest flex items-center justify-center gap-1">
+                <span className="text-[9px] font-mono text-emerald-400 uppercase tracking-widest flex items-center justify-center gap-1">
                   {selectedWord?.year ? `HITO HISTÓRICO ${selectedWord.year}` : "CONCEPTO DE NUESTROS 52 AÑOS"}
                 </span>
 
-                <div className="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-sky-300 to-amber-300 uppercase tracking-wider leading-tight px-2">
+                <div className="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-sky-300 to-emerald-300 uppercase tracking-wider leading-tight px-2">
                   &ldquo;{highlightedWord}&rdquo;
                 </div>
 
@@ -186,7 +186,7 @@ export function ShareSnapshotModal({ isOpen, onClose, selectedWord }: ShareSnaps
 
               {/* Card Footer */}
               <div className="relative z-10 pt-3 border-t border-slate-800/90 flex items-center justify-between text-[9px] text-slate-400 font-mono">
-                <span className="font-semibold text-amber-400">TRITECH 52 ANIVERSARIO</span>
+                <span className="font-semibold text-emerald-400">TRITECH 52 ANIVERSARIO</span>
                 <span className="text-slate-500">GRUPO TRITECH</span>
               </div>
             </div>
@@ -196,7 +196,7 @@ export function ShareSnapshotModal({ isOpen, onClose, selectedWord }: ShareSnaps
               <button
                 onClick={handleDownload}
                 disabled={downloading}
-                className="flex-1 py-3.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 via-blue-500 to-amber-500 hover:from-blue-500 hover:to-amber-400 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                className="flex-1 py-3.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 via-blue-500 to-emerald-500 hover:from-blue-500 hover:to-emerald-400 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
               >
                 <Download className="w-4 h-4" />
                 <span>{downloading ? "Exportando..." : "Descargar Imagen PNG"}</span>

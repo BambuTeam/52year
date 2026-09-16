@@ -65,7 +65,7 @@ export function addPhrase(data: {
     timestamp: new Date().toISOString(),
     status: "approved",
     position: [Math.cos(angle) * radius, Math.sin(angle) * radius * 0.75, z],
-    color: "#f59e0b", // Golden accent for user contributed phrases
+    color: "#52b788", // Tritech emerald green accent for user contributed phrases
     isCustom: true,
   };
 
