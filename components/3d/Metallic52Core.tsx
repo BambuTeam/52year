@@ -109,26 +109,62 @@ export function Metallic52Core({ powerUpTimestamp, introProgress = 1 }: Metallic
 
   useLayoutEffect(() => {
     if (scene52) {
-      // Center 52 Model
-      const box = new THREE.Box3().setFromObject(scene52);
-      const center = box.getCenter(new THREE.Vector3());
-      scene52.position.sub(center);
+      let mesh52: THREE.Mesh | null = null;
 
       scene52.traverse((child) => {
         if ((child as THREE.Mesh).isMesh) {
           const mesh = child as THREE.Mesh;
-          mesh.material = new THREE.MeshPhysicalMaterial({
-            color: new THREE.Color("#ffffff"), // Platinum Liquid Base
-            metalness: 0.98,
-            roughness: 0.08,
-            clearcoat: 0.9,
-            clearcoatRoughness: 0.04,
-            reflectivity: 0.95,
-            emissive: new THREE.Color("#2563eb"),
-            emissiveIntensity: 0.15,
-          });
+          const name = mesh.name || child.parent?.name || "";
+          const isAnos =
+            name.includes("001") ||
+            name.includes("004") ||
+            name.toLowerCase().includes("anos") ||
+            name.toLowerCase().includes("años");
+
+          if (isAnos) {
+            // High-Contrast Glowing Electric Cyan-Platinum Material for "AÑOS"
+            mesh.material = new THREE.MeshPhysicalMaterial({
+              color: new THREE.Color("#ffffff"),
+              metalness: 0.2, // Low metal darkness, high surface brightness
+              roughness: 0.05,
+              clearcoat: 1.0,
+              clearcoatRoughness: 0.02,
+              reflectivity: 0.98,
+              emissive: new THREE.Color("#38bdf8"), // Vibrant luminous cyan glow
+              emissiveIntensity: 0.85, // Highly legible crisp text
+            });
+            // Slightly bring forward to prevent Z-fighting with 52 base
+            mesh.position.z += 0.02;
+          } else {
+            mesh52 = mesh;
+            // Polished Liquid Platinum Base for "52"
+            mesh.material = new THREE.MeshPhysicalMaterial({
+              color: new THREE.Color("#ffffff"),
+              metalness: 0.96,
+              roughness: 0.08,
+              clearcoat: 0.95,
+              clearcoatRoughness: 0.04,
+              reflectivity: 0.95,
+              emissive: new THREE.Color("#2563eb"),
+              emissiveIntensity: 0.2,
+            });
+          }
         }
       });
+
+      // Precise Centering: Center strictly based on main "52" mesh so emblem is centered in Wankel rotor
+      if (mesh52) {
+        const box52 = new THREE.Box3().setFromObject(mesh52);
+        const center52 = box52.getCenter(new THREE.Vector3());
+        scene52.position.sub(center52);
+        // Visual balance offset centering emblem perfectly in rotor core
+        scene52.position.x += 0.04;
+        scene52.position.y += 0.03;
+      } else {
+        const box = new THREE.Box3().setFromObject(scene52);
+        const center = box.getCenter(new THREE.Vector3());
+        scene52.position.sub(center);
+      }
     }
 
     if (sceneWankel) {
@@ -192,14 +228,28 @@ export function Metallic52Core({ powerUpTimestamp, introProgress = 1 }: Metallic
     if (scene52) {
       const p = Math.min(1, Math.max(0, introProgress));
       const ease = 1 - Math.pow(1 - p, 3);
-      const breathingPulse = 0.15 + Math.sin(t * 1.2) * 0.08;
-      const currentEmissiveIntensity = p < 1 ? THREE.MathUtils.lerp(2.5, 0.15, ease) : breathingPulse + surgeFactor * 1.5;
+      const breathingPulse = 0.18 + Math.sin(t * 1.2) * 0.08;
+      const currentEmissiveIntensity = p < 1 ? THREE.MathUtils.lerp(2.5, 0.18, ease) : breathingPulse + surgeFactor * 1.5;
 
       scene52.traverse((child) => {
         if ((child as THREE.Mesh).isMesh && (child as THREE.Mesh).material) {
-          const mat = (child as THREE.Mesh).material as THREE.MeshPhysicalMaterial;
-          mat.emissive.copy(dynamicAuraColor);
-          mat.emissiveIntensity = currentEmissiveIntensity;
+          const mesh = child as THREE.Mesh;
+          const name = mesh.name || child.parent?.name || "";
+          const isAnos =
+            name.includes("001") ||
+            name.includes("004") ||
+            name.toLowerCase().includes("anos") ||
+            name.toLowerCase().includes("años");
+
+          const mat = mesh.material as THREE.MeshPhysicalMaterial;
+          if (isAnos) {
+            // AÑOS text maintains bright, high-visibility emissive glow
+            mat.emissive.copy(dynamicAuraColor);
+            mat.emissiveIntensity = 0.85 + Math.sin(t * 1.4) * 0.2 + surgeFactor * 2.2;
+          } else {
+            mat.emissive.copy(dynamicAuraColor);
+            mat.emissiveIntensity = currentEmissiveIntensity;
+          }
         }
       });
     }
@@ -277,16 +327,17 @@ export function Metallic52Core({ powerUpTimestamp, introProgress = 1 }: Metallic
         </group>
       </Float>
 
-      {/* 2. Official "52" Model Emblem with Dynamic Intro Scale & Insertion */}
+      {/* 2. Official "52" & "AÑOS" Model Emblem with Dynamic Intro Scale & Insertion */}
       <Float speed={1.4} rotationIntensity={0.08} floatIntensity={0.25}>
         <group ref={emblemGroupRef} scale={0.58} position={[0, 0, 0.4]}>
           <primitive object={scene52} />
         </group>
       </Float>
 
-      {/* Dedicated Front Spotlight for 52 Emblem */}
-      <directionalLight position={[0, 2, 6]} intensity={1.8} color="#ffffff" />
-      <pointLight ref={pointLightRef} position={[0, 0, 1.2]} intensity={1.0} color="#60a5fa" distance={6} />
+      {/* Dedicated Front Spotlight for 52 Emblem & AÑOS Text Legibility */}
+      <directionalLight position={[0, 2, 6]} intensity={2.0} color="#ffffff" />
+      <pointLight ref={pointLightRef} position={[0, 0, 1.4]} intensity={1.2} color="#60a5fa" distance={6} />
+      <pointLight position={[0, -0.3, 1.5]} intensity={1.8} color="#38bdf8" distance={4} />
 
       {/* 3. Royal Blue Precision Orbital Ring */}
       <group ref={ringBlueRef} rotation={[0.25, 0, 0]}>
