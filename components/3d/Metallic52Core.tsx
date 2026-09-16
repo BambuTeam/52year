@@ -89,6 +89,137 @@ function WankelCinematicFlare() {
   );
 }
 
+// GLSL 2D FBM Noise & Domain-Warped Flow for Procedural Internal Oil Swirl (Fragment Shader Only)
+const FRAGMENT_OIL_FLOW_GLSL = `
+vec2 hash22(vec2 p) {
+  p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
+  return -1.0 + 2.0 * fract(sin(p) * 43758.5453123);
+}
+
+float noise2D(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  vec2 u = f * f * (3.0 - 2.0 * f);
+  return mix(
+    mix(dot(hash22(i + vec2(0.0, 0.0)), f - vec2(0.0, 0.0)),
+        dot(hash22(i + vec2(1.0, 0.0)), f - vec2(1.0, 0.0)), u.x),
+    mix(dot(hash22(i + vec2(0.0, 1.0)), f - vec2(0.0, 1.0)),
+        dot(hash22(i + vec2(1.0, 1.0)), f - vec2(1.0, 1.0)), u.x), u.y);
+}
+
+float fbm2D(vec2 p) {
+  float v = 0.0;
+  float a = 0.5;
+  mat2 rot = mat2(0.8, 0.6, -0.6, 0.8);
+  for (int i = 0; i < 3; i++) {
+    v += a * noise2D(p);
+    p = rot * p * 2.0;
+    a *= 0.5;
+  }
+  return v;
+}
+`;
+
+function ProceduralUVFlowLiquid({ powerUpTimestamp }: { powerUpTimestamp?: number }) {
+  const meshRef = useRef<THREE.Mesh>(null);
+  const uniformsRef = useRef({
+    uTime: { value: 0 },
+    uFlowSpeed: { value: 1.0 },
+  });
+
+  const handleBeforeCompile = (shader: any) => {
+    shader.uniforms.uTime = uniformsRef.current.uTime;
+    shader.uniforms.uFlowSpeed = uniformsRef.current.uFlowSpeed;
+
+    shader.fragmentShader = `
+      uniform float uTime;
+      uniform float uFlowSpeed;
+      ${FRAGMENT_OIL_FLOW_GLSL}
+      ${shader.fragmentShader}
+    `;
+
+    shader.fragmentShader = shader.fragmentShader.replace(
+      "#include <color_fragment>",
+      `
+      #include <color_fragment>
+      vec2 st = vUv * vec2(6.0, 3.0);
+      vec2 q = vec2(0.0);
+      q.x = fbm2D(st + vec2(0.0, uTime * 0.25 * uFlowSpeed));
+      q.y = fbm2D(st + vec2(1.0, uTime * 0.18 * uFlowSpeed));
+
+      vec2 r = vec2(0.0);
+      r.x = fbm2D(st + 1.0 * q + vec2(1.7, 9.2) + 0.12 * uTime * uFlowSpeed);
+      r.y = fbm2D(st + 1.0 * q + vec2(8.3, 2.8) + 0.1 * uTime * uFlowSpeed);
+
+      float f = fbm2D(st + r);
+
+      // Swirling amber-gold color gradient
+      vec3 colBase = vec3(0.96, 0.62, 0.07); // #f59e0b
+      vec3 colGlow = vec3(0.98, 0.75, 0.14); // #fbbf24
+      vec3 colDark = vec3(0.85, 0.46, 0.02); // #d97706
+
+      vec3 oilFlowColor = mix(colBase, colGlow, clamp(f * f * 3.5, 0.0, 1.0));
+      oilFlowColor = mix(oilFlowColor, colDark, clamp(length(q), 0.0, 1.0) * 0.35);
+
+      diffuseColor.rgb *= oilFlowColor;
+      `
+    );
+  };
+
+  useFrame((state, delta) => {
+    const t = state.clock.getElapsedTime();
+
+    let surgeFactor = 0;
+    if (powerUpTimestamp) {
+      const elapsed = (Date.now() - powerUpTimestamp) / 1000;
+      if (elapsed < 3.5) {
+        surgeFactor = Math.pow(1 - elapsed / 3.5, 2);
+      }
+    }
+
+    const targetFlowSpeed = 1.0 + surgeFactor * 2.8;
+    uniformsRef.current.uFlowSpeed.value = THREE.MathUtils.damp(
+      uniformsRef.current.uFlowSpeed.value,
+      targetFlowSpeed,
+      6,
+      delta
+    );
+
+    uniformsRef.current.uTime.value += delta * uniformsRef.current.uFlowSpeed.value;
+
+    if (meshRef.current) {
+      meshRef.current.rotation.z = -t * 0.15;
+      meshRef.current.rotation.y = Math.sin(t * 0.2) * 0.08;
+    }
+  });
+
+  return (
+    <Float speed={1.1} rotationIntensity={0.12} floatIntensity={0.15}>
+      <mesh ref={meshRef} renderOrder={1} position={[0, 0, -0.05]}>
+        <torusGeometry args={[1.32, 0.36, 64, 128]} />
+        <meshPhysicalMaterial
+          color={new THREE.Color("#f59e0b")}
+          emissive={new THREE.Color("#d97706")}
+          emissiveIntensity={0.1}
+          metalness={0.0}
+          roughness={0.05}
+          transmission={0.95}
+          thickness={2.0}
+          ior={1.47}
+          specularIntensity={1.0}
+          clearcoat={1.0}
+          clearcoatRoughness={0.05}
+          reflectivity={0.95}
+          transparent={true}
+          opacity={0.95}
+          depthWrite={false}
+          onBeforeCompile={handleBeforeCompile}
+        />
+      </mesh>
+    </Float>
+  );
+}
+
 interface Metallic52CoreProps {
   powerUpTimestamp?: number;
   introProgress?: number;
@@ -97,12 +228,10 @@ interface Metallic52CoreProps {
 export function Metallic52Core({ powerUpTimestamp, introProgress = 1 }: Metallic52CoreProps) {
   const { scene: scene52 } = useGLTF("/52year.glb");
   const { scene: sceneWankel } = useGLTF("/wankel.glb");
-  const { scene: sceneFluido } = useGLTF("/fluido.glb");
 
   const coreGroup = useRef<THREE.Group>(null);
   const emblemGroupRef = useRef<THREE.Group>(null);
   const wankelRotorRef = useRef<THREE.Group>(null);
-  const fluidoGroupRef = useRef<THREE.Group>(null);
   const ringBlueRef = useRef<THREE.Group>(null);
   const ringGoldRef = useRef<THREE.Group>(null);
   const ringCyanRef = useRef<THREE.Group>(null);
@@ -155,37 +284,7 @@ export function Metallic52Core({ powerUpTimestamp, introProgress = 1 }: Metallic
         }
       });
     }
-
-    if (sceneFluido) {
-      // Center & Configure Clean Photorealistic Liquid Glass Material on Static GLB Mesh
-      const boxF = new THREE.Box3().setFromObject(sceneFluido);
-      const centerF = boxF.getCenter(new THREE.Vector3());
-      sceneFluido.position.sub(centerF);
-
-      sceneFluido.traverse((child) => {
-        if ((child as THREE.Mesh).isMesh) {
-          const mesh = child as THREE.Mesh;
-          mesh.renderOrder = 1;
-          mesh.material = new THREE.MeshPhysicalMaterial({
-            color: new THREE.Color("#f59e0b"), // Vibrant Amber Gold
-            emissive: new THREE.Color("#d97706"), // Warm golden emission accent
-            emissiveIntensity: 0.1,
-            metalness: 0.0, // Non-metallic liquid
-            roughness: 0.05, // Ultra-smooth wet finish
-            transmission: 0.9, // Translucent liquid glass finish
-            thickness: 1.5, // Depth volume for realistic fluid refraction
-            ior: 1.47, // Index of refraction for mineral oil
-            clearcoat: 1.0,
-            clearcoatRoughness: 0.05,
-            reflectivity: 0.95,
-            transparent: true,
-            opacity: 0.95,
-            depthWrite: false, // Clean depth sorting without blocking constellations
-          });
-        }
-      });
-    }
-  }, [scene52, sceneWankel, sceneFluido]);
+  }, [scene52, sceneWankel]);
 
   useFrame((state, delta) => {
     const t = state.clock.getElapsedTime();
@@ -257,16 +356,6 @@ export function Metallic52Core({ powerUpTimestamp, introProgress = 1 }: Metallic
       wankelRotorRef.current.rotation.y = Math.sin(t * 0.2) * 0.1;
     }
 
-    // Smooth & Gentle Scale Pulsing on Fluid Lubricant Splash (Between 1.0x and 1.08x)
-    if (fluidoGroupRef.current) {
-      fluidoGroupRef.current.rotation.z = -t * 0.15;
-      fluidoGroupRef.current.rotation.y = Math.sin(t * 0.2) * 0.08;
-
-      const baseFluidScale = 0.28;
-      const pulseScale = baseFluidScale * (1.0 + Math.sin(surgeFactor * Math.PI) * 0.08);
-      fluidoGroupRef.current.scale.set(pulseScale, pulseScale, pulseScale);
-    }
-
     // Synchronized Atmospheric Point Light Radiating Dynamic Color onto Wankel Core Surfaces
     if (pointLightRef.current) {
       const introGlow = introProgress < 1 ? (1 - introProgress) * 4.5 : 0;
@@ -319,12 +408,8 @@ export function Metallic52Core({ powerUpTimestamp, introProgress = 1 }: Metallic
         </group>
       </Float>
 
-      {/* 2. Official Photorealistic Industrial Lubricant Fluid Splash Mesh */}
-      <Float speed={1.1} rotationIntensity={0.12} floatIntensity={0.15}>
-        <group ref={fluidoGroupRef} scale={0.28} position={[0, 0, 0]}>
-          <primitive object={sceneFluido} />
-        </group>
-      </Float>
+      {/* 2. Procedural Fragment Shader UV Flow Liquid (Rock-solid geometry, internal oil currents) */}
+      <ProceduralUVFlowLiquid powerUpTimestamp={powerUpTimestamp} />
 
       {/* 3. Official "52" Model Emblem with Dynamic Intro Scale & Insertion */}
       <Float speed={1.4} rotationIntensity={0.08} floatIntensity={0.25}>
