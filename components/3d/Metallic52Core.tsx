@@ -89,168 +89,6 @@ function WankelCinematicFlare() {
   );
 }
 
-// GLSL 3D Simplex Noise for Procedural Internal Oil Swirl (Fragment Shader Only)
-const FRAGMENT_OIL_FLOW_3D_GLSL = `
-vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
-vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
-float snoise(vec3 v) {
-  const vec2 C = vec2(1.0/6.0, 1.0/3.0);
-  const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
-  vec3 i  = floor(v + dot(v, C.yyy) );
-  vec3 x0 = v - i + dot(i, C.xxx) ;
-  vec3 g = step(x0.yzx, x0.xyz);
-  vec3 l = 1.0 - g;
-  vec3 i1 = min( g.xyz, l.zxy );
-  vec3 i2 = max( g.xyz, l.zxy );
-  vec3 x1 = x0 - i1 + C.xxx;
-  vec3 x2 = x0 - i2 + C.yyy;
-  vec3 x3 = x0 - D.yyy;
-  i = mod289(i);
-  vec4 p = permute( permute( permute(
-             i.z + vec4(0.0, i1.z, i2.z, 1.0 ))
-           + i.y + vec4(0.0, i1.y, i2.y, 1.0 ))
-           + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
-  float n_ = 0.142857142857;
-  vec3  ns = n_ * D.wyz - D.xzx;
-  vec4 j = p - 49.0 * floor(p * ns.z);
-  vec4 x_ = floor(j * ns.z);
-  vec4 y_ = floor(j - 7.0 * x_ );
-  vec4 x = x_ * ns.x + ns.yyyy;
-  vec4 y = y_ * ns.x + ns.yyyy;
-  vec4 h = 1.0 - abs(x) - abs(y);
-  vec4 b0 = vec4( x.xy, y.xy );
-  vec4 b1 = vec4( x.zw, y.zw );
-  vec4 s0 = floor(b0)*2.0 + 1.0;
-  vec4 s1 = floor(b1)*2.0 + 1.0;
-  vec4 sh = -step(h, vec4(0.0));
-  vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;
-  vec4 a1 = b1.xzyw + s1.xzyw*sh.xyxy ;
-  vec3 p0 = vec3(a0.xy,h.x);
-  vec3 p1 = vec3(a0.zw,h.y);
-  vec3 p2 = vec3(a1.xy,h.z);
-  vec3 p3 = vec3(a1.zw,h.w);
-  vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
-  p0 *= norm.x;
-  p1 *= norm.y;
-  p2 *= norm.z;
-  p3 *= norm.w;
-  vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
-  m = m * m;
-  return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3) ) );
-}
-`;
-
-function ProceduralUVFlowLiquid({ powerUpTimestamp }: { powerUpTimestamp?: number }) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const uniformsRef = useRef({
-    uTime: { value: 0 },
-    uFlowSpeed: { value: 1.0 },
-  });
-
-  const handleBeforeCompile = (shader: any) => {
-    shader.uniforms.uTime = uniformsRef.current.uTime;
-    shader.uniforms.uFlowSpeed = uniformsRef.current.uFlowSpeed;
-
-    // Inject varying vec3 vCustomPos into vertex shader
-    shader.vertexShader = `
-      varying vec3 vCustomPos;
-      ${shader.vertexShader}
-    `;
-    shader.vertexShader = shader.vertexShader.replace(
-      "#include <begin_vertex>",
-      `
-      #include <begin_vertex>
-      vCustomPos = position;
-      `
-    );
-
-    // Inject varying vec3 vCustomPos & Simplex Noise into fragment shader
-    shader.fragmentShader = `
-      varying vec3 vCustomPos;
-      uniform float uTime;
-      uniform float uFlowSpeed;
-      ${FRAGMENT_OIL_FLOW_3D_GLSL}
-      ${shader.fragmentShader}
-    `;
-
-    shader.fragmentShader = shader.fragmentShader.replace(
-      "#include <color_fragment>",
-      `
-      #include <color_fragment>
-      vec3 p = vCustomPos * 2.2 + vec3(0.0, 0.0, uTime * 0.35 * uFlowSpeed);
-      float n1 = snoise(p);
-      float n2 = snoise(p * 2.1 + vec3(n1 * 1.4, uTime * 0.25 * uFlowSpeed, 0.0));
-      float f = (n1 + n2 * 0.5) * 0.5 + 0.5;
-
-      // Swirling amber-gold color gradient
-      vec3 colBase = vec3(0.96, 0.62, 0.07); // #f59e0b
-      vec3 colGlow = vec3(0.98, 0.75, 0.14); // #fbbf24
-      vec3 colDark = vec3(0.85, 0.46, 0.02); // #d97706
-
-      vec3 oilFlowColor = mix(colBase, colGlow, clamp(f * 1.3, 0.0, 1.0));
-      oilFlowColor = mix(oilFlowColor, colDark, clamp((1.0 - f) * 0.7, 0.0, 1.0));
-
-      diffuseColor.rgb *= oilFlowColor;
-      `
-    );
-  };
-
-  useFrame((state, delta) => {
-    const t = state.clock.getElapsedTime();
-
-    let surgeFactor = 0;
-    if (powerUpTimestamp) {
-      const elapsed = (Date.now() - powerUpTimestamp) / 1000;
-      if (elapsed < 3.5) {
-        surgeFactor = Math.pow(1 - elapsed / 3.5, 2);
-      }
-    }
-
-    const targetFlowSpeed = 1.0 + surgeFactor * 2.8;
-    uniformsRef.current.uFlowSpeed.value = THREE.MathUtils.damp(
-      uniformsRef.current.uFlowSpeed.value,
-      targetFlowSpeed,
-      6,
-      delta
-    );
-
-    uniformsRef.current.uTime.value += delta * uniformsRef.current.uFlowSpeed.value;
-
-    if (meshRef.current) {
-      meshRef.current.rotation.z = -t * 0.15;
-      meshRef.current.rotation.y = Math.sin(t * 0.2) * 0.08;
-    }
-  });
-
-  return (
-    <Float speed={1.1} rotationIntensity={0.12} floatIntensity={0.15}>
-      <mesh ref={meshRef} renderOrder={1} position={[0, 0, -0.05]}>
-        <torusGeometry args={[1.32, 0.36, 64, 128]} />
-        <meshPhysicalMaterial
-          color={new THREE.Color("#f59e0b")}
-          emissive={new THREE.Color("#d97706")}
-          emissiveIntensity={0.1}
-          metalness={0.0}
-          roughness={0.05}
-          transmission={0.95}
-          thickness={2.0}
-          ior={1.47}
-          specularIntensity={1.0}
-          clearcoat={1.0}
-          clearcoatRoughness={0.05}
-          reflectivity={0.95}
-          transparent={true}
-          opacity={0.95}
-          depthWrite={false}
-          onBeforeCompile={handleBeforeCompile}
-        />
-      </mesh>
-    </Float>
-  );
-}
-
 interface Metallic52CoreProps {
   powerUpTimestamp?: number;
   introProgress?: number;
@@ -259,10 +97,12 @@ interface Metallic52CoreProps {
 export function Metallic52Core({ powerUpTimestamp, introProgress = 1 }: Metallic52CoreProps) {
   const { scene: scene52 } = useGLTF("/52year.glb");
   const { scene: sceneWankel } = useGLTF("/wankel.glb");
+  const { scene: sceneFluido } = useGLTF("/fluido.glb");
 
   const coreGroup = useRef<THREE.Group>(null);
   const emblemGroupRef = useRef<THREE.Group>(null);
   const wankelRotorRef = useRef<THREE.Group>(null);
+  const fluidoGroupRef = useRef<THREE.Group>(null);
   const ringBlueRef = useRef<THREE.Group>(null);
   const ringGoldRef = useRef<THREE.Group>(null);
   const ringCyanRef = useRef<THREE.Group>(null);
@@ -315,7 +155,37 @@ export function Metallic52Core({ powerUpTimestamp, introProgress = 1 }: Metallic
         }
       });
     }
-  }, [scene52, sceneWankel]);
+
+    if (sceneFluido) {
+      // Center original asymmetrical lubricant splash mesh around origin
+      const boxF = new THREE.Box3().setFromObject(sceneFluido);
+      const centerF = boxF.getCenter(new THREE.Vector3());
+      sceneFluido.position.sub(centerF);
+
+      sceneFluido.traverse((child) => {
+        if ((child as THREE.Mesh).isMesh) {
+          const mesh = child as THREE.Mesh;
+          mesh.renderOrder = 1;
+          mesh.material = new THREE.MeshPhysicalMaterial({
+            color: new THREE.Color("#d97706"), // Deep amber-gold motor oil
+            emissive: new THREE.Color("#78350f"), // Deep golden warmth
+            emissiveIntensity: 0.1,
+            metalness: 0.0, // Pure fluid liquid
+            roughness: 0.04, // Wet, glossy finish
+            transmission: 0.9, // Translucent fluid look
+            thickness: 1.5, // Realistic fluid refraction volume
+            ior: 1.47, // Mineral oil index of refraction
+            clearcoat: 1.0,
+            clearcoatRoughness: 0.05,
+            reflectivity: 0.95,
+            transparent: true,
+            opacity: 0.95,
+            depthWrite: false, // Clean depth sorting without blocking constellations
+          });
+        }
+      });
+    }
+  }, [scene52, sceneWankel, sceneFluido]);
 
   useFrame((state, delta) => {
     const t = state.clock.getElapsedTime();
@@ -387,6 +257,19 @@ export function Metallic52Core({ powerUpTimestamp, introProgress = 1 }: Metallic
       wankelRotorRef.current.rotation.y = Math.sin(t * 0.2) * 0.1;
     }
 
+    // Organic Breathing Rhythm + Power-Up Splash Surge on fluido.glb Mesh
+    if (fluidoGroupRef.current) {
+      fluidoGroupRef.current.rotation.z = -t * 0.15;
+      fluidoGroupRef.current.rotation.y = Math.sin(t * 0.2) * 0.08;
+
+      const baseFluidScale = 0.28;
+      const breathingRhythm = Math.sin(t * 1.2) * 0.03;
+      const splashSurge = Math.sin(surgeFactor * Math.PI) * 0.10;
+      const currentScale = baseFluidScale * (1.0 + breathingRhythm + splashSurge);
+
+      fluidoGroupRef.current.scale.set(currentScale, currentScale, currentScale);
+    }
+
     // Synchronized Atmospheric Point Light Radiating Dynamic Color onto Wankel Core Surfaces
     if (pointLightRef.current) {
       const introGlow = introProgress < 1 ? (1 - introProgress) * 4.5 : 0;
@@ -439,8 +322,12 @@ export function Metallic52Core({ powerUpTimestamp, introProgress = 1 }: Metallic
         </group>
       </Float>
 
-      {/* 2. Procedural Fragment Shader UV Flow Liquid (Rock-solid geometry, internal oil currents) */}
-      <ProceduralUVFlowLiquid powerUpTimestamp={powerUpTimestamp} />
+      {/* 2. Official Photorealistic Industrial Lubricant Fluid Splash Mesh (fluido.glb) */}
+      <Float speed={1.1} rotationIntensity={0.12} floatIntensity={0.15}>
+        <group ref={fluidoGroupRef} scale={0.28} position={[0, 0, 0]}>
+          <primitive object={sceneFluido} />
+        </group>
+      </Float>
 
       {/* 3. Official "52" Model Emblem with Dynamic Intro Scale & Insertion */}
       <Float speed={1.4} rotationIntensity={0.08} floatIntensity={0.25}>
