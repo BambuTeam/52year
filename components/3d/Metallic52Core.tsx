@@ -146,8 +146,8 @@ function ProceduralLiquidFluid({ powerUpTimestamp }: { powerUpTimestamp?: number
   const meshRef = useRef<THREE.Mesh>(null);
   const uniformsRef = useRef({
     uTime: { value: 0 },
-    uDisplacement: { value: 0.14 },
-    uFrequency: { value: 1.3 },
+    uDisplacement: { value: 0.008 },
+    uFrequency: { value: 1.6 },
   });
 
   const handleBeforeCompile = (shader: any) => {
@@ -167,9 +167,9 @@ function ProceduralLiquidFluid({ powerUpTimestamp }: { powerUpTimestamp?: number
       "#include <begin_vertex>",
       `
       #include <begin_vertex>
-      vec3 noisePos = position * uFrequency + vec3(uTime * 0.45, uTime * 0.35, uTime * 0.55);
+      vec3 noisePos = position * uFrequency + vec3(uTime * 0.4, uTime * 0.3, uTime * 0.5);
       float noiseVal = snoise(noisePos);
-      transformed += normal * noiseVal * uDisplacement;
+      transformed += normal * (noiseVal * uDisplacement);
       `
     );
   };
@@ -185,11 +185,12 @@ function ProceduralLiquidFluid({ powerUpTimestamp }: { powerUpTimestamp?: number
       }
     }
 
-    const timeSpeed = 1.0 + surgeFactor * 2.8;
+    const timeSpeed = 1.0 + surgeFactor * 1.5;
     uniformsRef.current.uTime.value += delta * timeSpeed;
 
-    const targetDisplacement = THREE.MathUtils.lerp(0.14, 0.38, surgeFactor);
-    const targetFrequency = THREE.MathUtils.lerp(1.3, 2.6, surgeFactor);
+    // Drastically calmed down noise displacement factor (0.008 base -> 0.015 max surge)
+    const targetDisplacement = THREE.MathUtils.lerp(0.008, 0.015, surgeFactor);
+    const targetFrequency = THREE.MathUtils.lerp(1.6, 2.2, surgeFactor);
 
     uniformsRef.current.uDisplacement.value = THREE.MathUtils.damp(
       uniformsRef.current.uDisplacement.value,
@@ -206,22 +207,22 @@ function ProceduralLiquidFluid({ powerUpTimestamp }: { powerUpTimestamp?: number
     );
 
     if (meshRef.current) {
-      meshRef.current.rotation.z = -t * 0.18;
-      meshRef.current.rotation.y = Math.sin(t * 0.25) * 0.12;
+      meshRef.current.rotation.z = -t * 0.12;
+      meshRef.current.rotation.y = Math.sin(t * 0.2) * 0.08;
 
-      const scalePulse = 1.0 + Math.sin(surgeFactor * Math.PI) * 0.22;
+      const scalePulse = 1.0 + Math.sin(surgeFactor * Math.PI) * 0.05;
       meshRef.current.scale.set(scalePulse, scalePulse, scalePulse);
     }
   });
 
   return (
-    <Float speed={1.1} rotationIntensity={0.15} floatIntensity={0.2}>
+    <Float speed={1.1} rotationIntensity={0.12} floatIntensity={0.15}>
       <mesh ref={meshRef} renderOrder={1} position={[0, 0, -0.05]}>
-        <torusGeometry args={[1.35, 0.42, 64, 128]} />
+        <torusGeometry args={[1.32, 0.36, 64, 128]} />
         <meshPhysicalMaterial
           color={new THREE.Color("#f59e0b")}
           emissive={new THREE.Color("#d97706")}
-          emissiveIntensity={0.12}
+          emissiveIntensity={0.1}
           metalness={0.0}
           roughness={0.03}
           transmission={0.95}
