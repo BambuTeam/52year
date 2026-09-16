@@ -169,9 +169,10 @@ export function OrbitingWords3D({
       {/* Central Metallic Extruded "52" Emblem Core with Power-Up Reaction */}
       <Metallic52Core powerUpTimestamp={powerUpTimestamp} introProgress={introProgress} />
 
-      {/* Serene, Minimal Deep Space Star Dust Layer (Zero Noise) */}
+      {/* 2050.earth Atmospheric Volumetric Star Dust Layers (Cyan & Amber) */}
       <group ref={starFarRef}>
-        <Sparkles count={60} scale={26} size={1.6} speed={0.04} opacity={0.35} color="#38bdf8" />
+        <Sparkles count={65} scale={28} size={1.8} speed={0.03} opacity={0.35} color="#38bdf8" />
+        <Sparkles count={45} scale={20} size={1.4} speed={0.02} opacity={0.25} color="#fbbf24" />
       </group>
 
       {/* Dynamic Laser Energy Beams Inward to Core */}

@@ -114,9 +114,9 @@ export function WordCloud52Canvas({
   }
 
   return (
-    <div className="w-full h-full relative cursor-grab active:cursor-grabbing touch-none select-none">
-      {/* Background Radial Glow */}
-      <div className="absolute inset-0 bg-radial from-blue-900/20 via-transparent to-transparent pointer-events-none blur-3xl" />
+    <div className="w-full h-full relative cursor-grab active:cursor-grabbing touch-none select-none bg-gradient-to-b from-[#03050c] via-[#070b1e] to-[#020307]">
+      {/* 2050.earth Atmospheric Deep Space Radial Glow */}
+      <div className="absolute inset-0 bg-radial from-cyan-950/25 via-blue-950/10 to-transparent pointer-events-none blur-3xl" />
 
       <Canvas
         gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
