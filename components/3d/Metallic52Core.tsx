@@ -165,21 +165,22 @@ export function Metallic52Core({ powerUpTimestamp, introProgress = 1 }: Metallic
       sceneFluido.traverse((child) => {
         if ((child as THREE.Mesh).isMesh) {
           const mesh = child as THREE.Mesh;
+          mesh.renderOrder = 1;
           mesh.material = new THREE.MeshPhysicalMaterial({
-            color: new THREE.Color("#d97706"), // Deep amber-gold honey lubricant
-            emissive: new THREE.Color("#78350f"), // Deep golden inner warmth
-            emissiveIntensity: 0.25,
-            metalness: 0.1,
-            roughness: 0.08,
-            transmission: 0.85, // Translucent liquid glass finish
-            thickness: 0.8,
+            color: new THREE.Color("#fbbf24"), // Vibrant amber-gold motor oil
+            emissive: new THREE.Color("#d97706"), // Warm golden inner glow accent
+            emissiveIntensity: 0.1,
+            metalness: 0.0, // Non-metallic liquid
+            roughness: 0.05, // Ultra-smooth wet finish
+            transmission: 0.9, // Translucent glass-like liquid finish
+            thickness: 1.2, // Depth volume for realistic fluid refraction
             ior: 1.47, // Index of refraction for mineral oil
             clearcoat: 1.0,
-            clearcoatRoughness: 0.1,
+            clearcoatRoughness: 0.05,
             reflectivity: 0.9,
             transparent: true,
-            opacity: 0.92,
-            depthWrite: false, // Clean depth sorting relative to core meshes
+            opacity: 0.95,
+            depthWrite: false, // Clean depth sorting without blocking constellations
           });
         }
       });
@@ -261,8 +262,9 @@ export function Metallic52Core({ powerUpTimestamp, introProgress = 1 }: Metallic
       fluidoGroupRef.current.rotation.z = -t * 0.25;
       fluidoGroupRef.current.rotation.y = Math.sin(t * 0.3) * 0.15;
 
-      const fluidPulse = 1.0 + Math.sin(surgeFactor * Math.PI) * 0.28;
-      fluidoGroupRef.current.scale.set(0.52 * fluidPulse, 0.52 * fluidPulse, 0.52 * fluidPulse);
+      const baseFluidScale = 0.28;
+      const fluidPulse = 1.0 + Math.sin(surgeFactor * Math.PI) * 0.22;
+      fluidoGroupRef.current.scale.set(baseFluidScale * fluidPulse, baseFluidScale * fluidPulse, baseFluidScale * fluidPulse);
     }
 
     // Synchronized Atmospheric Point Light Radiating Dynamic Color onto Wankel Core Surfaces
@@ -319,7 +321,7 @@ export function Metallic52Core({ powerUpTimestamp, introProgress = 1 }: Metallic
 
       {/* 2. Official Photorealistic Industrial Lubricant Fluid Splash Mesh */}
       <Float speed={1.1} rotationIntensity={0.12} floatIntensity={0.18}>
-        <group ref={fluidoGroupRef} scale={0.52} position={[0, 0, 0]}>
+        <group ref={fluidoGroupRef} scale={0.28} position={[0, 0, 0]}>
           <primitive object={sceneFluido} />
         </group>
       </Float>
