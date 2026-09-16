@@ -2,8 +2,8 @@
 
 import React, { useState, ChangeEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Sparkles, User, Globe, MessageSquareQuote, CheckCircle2, Loader2 } from "lucide-react";
-import { TritechWord } from "@/lib/wordList";
+import { X, Sparkles, User, Globe, MessageSquareQuote, CheckCircle2, Loader2, ShieldCheck } from "lucide-react";
+import { TritechWord, SAFE_TRITECH_PHRASES } from "@/lib/wordList";
 
 interface AddWordModalProps {
   isOpen: boolean;
@@ -26,9 +26,25 @@ export function AddWordModal({ isOpen, onClose, onAddWord }: AddWordModalProps) 
     }
   };
 
+  const handleSelectSafePhrase = (phrase: string) => {
+    setMessage(phrase);
+    setErrorMessage("");
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!message.trim()) return;
+    const cleanText = message.trim();
+    if (!cleanText) return;
+
+    if (cleanText.length < 3) {
+      setErrorMessage("El mensaje debe tener al menos 3 caracteres.");
+      return;
+    }
+
+    if (/^(.)\1{4,}$/.test(cleanText)) {
+      setErrorMessage("Por favor elige una palabra de la lista sugerida o escribe un concepto válido.");
+      return;
+    }
 
     setIsSubmitting(true);
     setErrorMessage("");
@@ -38,7 +54,7 @@ export function AddWordModal({ isOpen, onClose, onAddWord }: AddWordModalProps) 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          text: message.trim(),
+          text: cleanText,
           author: author.trim() || "Colaborador Tritech",
           country: country.trim() || "Guatemala",
         }),
@@ -99,12 +115,13 @@ export function AddWordModal({ isOpen, onClose, onAddWord }: AddWordModalProps) 
             className="absolute inset-0 bg-slate-950/85 backdrop-blur-xl"
           />
 
-          {/* Holographic Glass Modal Container with High Responsiveness */}
+          {/* Holographic Glass Modal Container */}
           <motion.div
             initial={{ opacity: 0, scale: 0.92, y: 16 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.92, y: 16 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            onClick={(e) => e.stopPropagation()}
             className="relative z-10 w-full max-w-lg max-h-[90vh] overflow-y-auto bg-slate-950/90 border border-cyan-400/35 rounded-3xl p-5 sm:p-7 shadow-[0_0_50px_rgba(6,182,212,0.18),inset_0_1px_1px_rgba(255,255,255,0.12)] backdrop-blur-2xl"
           >
             {/* Tactical Scanline */}
@@ -155,7 +172,7 @@ export function AddWordModal({ isOpen, onClose, onAddWord }: AddWordModalProps) 
                     DIGITAR MENSAJE / CONCEPTO
                   </h3>
                   <p className="text-slate-400 text-xs font-light leading-relaxed">
-                    Escribe un mensaje o hito para ser integrado de forma inmediata al universo 3D interactivo.
+                    Selecciona una palabra segura sugerida o escribe tu concepto conmemorativo.
                   </p>
                 </div>
 
@@ -189,6 +206,33 @@ export function AddWordModal({ isOpen, onClose, onAddWord }: AddWordModalProps) 
                     onChange={handleMessageChange}
                     className="w-full px-3.5 py-3 sm:px-4 sm:py-3.5 rounded-2xl bg-cyan-950/40 border border-cyan-400/40 text-cyan-200 placeholder:text-slate-600 focus:outline-none focus:border-cyan-400 text-sm sm:text-base font-mono font-bold uppercase tracking-wider transition-all shadow-[inset_0_0_12px_rgba(6,182,212,0.15)]"
                   />
+                </div>
+
+                {/* Safe Words Quick-Select Section */}
+                <div className="flex flex-col gap-2 p-3 rounded-2xl bg-cyan-950/30 border border-cyan-400/20">
+                  <div className="flex items-center gap-1.5 text-[10px] font-mono text-cyan-300 uppercase font-semibold">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                    <span>PALABRAS / FRASES SEGURAS SUGERIDAS (CLIC PARA ELEGIR):</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto pr-1 scrollbar-thin">
+                    {SAFE_TRITECH_PHRASES.map((safePhrase) => {
+                      const isSelected = message === safePhrase;
+                      return (
+                        <button
+                          key={safePhrase}
+                          type="button"
+                          onClick={() => handleSelectSafePhrase(safePhrase)}
+                          className={`px-2.5 py-1 rounded-xl text-[10px] font-mono transition-all ${
+                            isSelected
+                              ? "bg-amber-500 text-slate-950 font-bold border border-amber-300 shadow-[0_0_10px_rgba(251,191,36,0.5)]"
+                              : "bg-slate-900/80 text-cyan-200 border border-cyan-400/20 hover:border-cyan-400/60 hover:bg-cyan-900/40"
+                          }`}
+                        >
+                          {safePhrase}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 {/* Field 2: Author / Name */}

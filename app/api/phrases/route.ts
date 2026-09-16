@@ -35,16 +35,39 @@ export async function POST(request: Request) {
     }
 
     const { text, author, department, country } = body || {};
+    const trimmedText = typeof text === "string" ? text.trim() : "";
 
-    if (!text || typeof text !== "string" || !text.trim()) {
+    if (!trimmedText) {
       return NextResponse.json(
         { success: false, error: "El campo mensaje / frase es obligatorio." },
         { status: 400 }
       );
     }
 
+    if (trimmedText.length < 3) {
+      return NextResponse.json(
+        { success: false, error: "El mensaje debe tener al menos 3 caracteres." },
+        { status: 400 }
+      );
+    }
+
+    if (trimmedText.length > 48) {
+      return NextResponse.json(
+        { success: false, error: "El mensaje no puede exceder los 48 caracteres." },
+        { status: 400 }
+      );
+    }
+
+    // Check for repetitive gibberish (e.g., "aaaaa")
+    if (/^(.)\1{4,}$/.test(trimmedText)) {
+      return NextResponse.json(
+        { success: false, error: "Por favor ingresa un mensaje o concepto válido." },
+        { status: 400 }
+      );
+    }
+
     const phrase = addPhrase({
-      text: text.trim(),
+      text: trimmedText,
       author: typeof author === "string" ? author : "Colaborador Tritech",
       department: typeof country === "string" ? country : department || "Guatemala",
       country: typeof country === "string" ? country : department || "Guatemala",

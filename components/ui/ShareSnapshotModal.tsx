@@ -76,6 +76,7 @@ export function ShareSnapshotModal({ isOpen, onClose, selectedWord }: ShareSnaps
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            onClick={(e) => e.stopPropagation()}
             className="relative z-10 w-full max-w-md max-h-[94vh] overflow-y-auto bg-slate-900/95 border border-slate-800 rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col items-center gap-4 sm:gap-5 backdrop-blur-2xl overflow-hidden"
           >
             {/* Tactical Laser Scanning Line Effect */}

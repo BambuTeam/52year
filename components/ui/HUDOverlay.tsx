@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Sparkles, PlusCircle, Camera, RotateCcw, ShieldCheck, History, Calendar } from "lucide-react";
+import { Sparkles, PlusCircle, Camera, RotateCcw, ShieldCheck, History, Calendar, X } from "lucide-react";
 import { TritechWord } from "@/lib/wordList";
 
 interface HUDOverlayProps {
@@ -67,71 +67,77 @@ export function HUDOverlay({
 
       {/* Selected Word Active Detail Floating Card / Responsive Milestone Modal */}
       {selectedWord && (
-        <div className="pointer-events-auto relative self-center bg-slate-950/95 border border-cyan-400/50 backdrop-blur-2xl rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-[0_0_40px_rgba(6,182,212,0.25)] max-w-sm w-[92vw] sm:max-w-md text-center flex flex-col items-center gap-2.5 sm:gap-3 animate-in fade-in zoom-in duration-300 my-auto max-h-[70vh] sm:max-h-[80vh] overflow-y-auto overflow-x-hidden selection:bg-none">
-          <div className="hud-corner-tl !border-cyan-400" />
-          <div className="hud-corner-tr !border-cyan-400" />
-          <div className="hud-corner-bl !border-cyan-400" />
-          <div className="hud-corner-br !border-cyan-400" />
-
-          {/* Quick Top-Right Close Button */}
-          <button
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 selection:bg-none pointer-events-auto">
+          {/* Glassmorphism Backdrop Overlay - Clicking outside closes modal */}
+          <div
             onClick={onResetSelection}
-            className="absolute top-3 right-3 p-1.5 rounded-full bg-slate-900/90 border border-slate-700/80 text-slate-400 hover:text-white hover:border-cyan-400/60 transition-all z-20"
-            title="Cerrar modal"
+            className="absolute inset-0 bg-slate-950/80 backdrop-blur-md"
+          />
+
+          {/* Modal Card Container */}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative z-10 bg-slate-950/95 border border-cyan-400/50 backdrop-blur-2xl rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-[0_0_40px_rgba(6,182,212,0.25)] max-w-sm w-[92vw] sm:max-w-md text-center flex flex-col items-center gap-3 animate-in fade-in zoom-in duration-300 max-h-[80vh] overflow-y-auto overflow-x-hidden selection:bg-none"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
-          </button>
+            <div className="hud-corner-tl !border-cyan-400" />
+            <div className="hud-corner-tr !border-cyan-400" />
+            <div className="hud-corner-bl !border-cyan-400" />
+            <div className="hud-corner-br !border-cyan-400" />
 
-          <div className="flex items-center justify-between w-full border-b border-slate-800/90 pb-2 pr-7">
-            <div className="flex items-center gap-1.5 text-[9px] sm:text-[10px] font-mono text-cyan-400 uppercase tracking-widest truncate">
-              <History className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 text-cyan-400" />
-              <span className="truncate">
-                {selectedWord.id === lastSubmittedWordId
-                  ? "★ ÚLTIMA FRASE SUBIDA ★"
-                  : "HITO HISTÓRICO TRITECH"}
-              </span>
-            </div>
-
-            {selectedWord.year ? (
-              <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[9px] sm:text-[10px] font-mono font-bold flex items-center gap-1 shrink-0">
-                <Calendar className="w-3 h-3" />
-                {selectedWord.year}
-              </span>
-            ) : selectedWord.id === lastSubmittedWordId ? (
-              <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-500/50 text-emerald-400 text-[9px] sm:text-[10px] font-mono font-bold shrink-0">
-                NUEVO APORTE
-              </span>
-            ) : null}
-          </div>
-
-          <div className="text-xl sm:text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-200 to-emerald-300 uppercase tracking-wider leading-tight">
-            &ldquo;{selectedWord.text}&rdquo;
-          </div>
-
-          {selectedWord.historyNote ? (
-            <p className="text-[11px] sm:text-xs text-slate-300 font-light leading-relaxed px-2 bg-slate-900/70 p-2.5 sm:p-3 rounded-xl border border-slate-800/80 w-full text-left">
-              {selectedWord.historyNote}
-            </p>
-          ) : selectedWord.author ? (
-            <span className="text-[11px] sm:text-xs text-slate-400">
-              Aportado por: <strong className="text-white">{selectedWord.author}</strong> ({selectedWord.country || selectedWord.plant})
-            </span>
-          ) : null}
-
-          <div className="flex items-center gap-2 pt-1 w-full justify-center">
-            <button
-              onClick={onOpenShareModal}
-              className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider transition-all shadow-md shadow-blue-600/30 flex items-center justify-center gap-1.5"
-            >
-              <Camera className="w-3.5 h-3.5" />
-              Capturar Hito
-            </button>
+            {/* Top-Right Corner Close Button 'X' */}
             <button
               onClick={onResetSelection}
-              className="px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white text-[10px] sm:text-xs font-mono"
+              className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 p-2 rounded-2xl bg-cyan-950/60 border border-cyan-400/30 text-cyan-300 hover:text-white hover:border-cyan-400/80 transition-all z-20"
+              title="Cerrar modal"
             >
-              Cerrar
+              <X className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
+
+            <div className="flex items-center justify-between w-full border-b border-slate-800/90 pb-2.5 pr-8">
+              <div className="flex items-center gap-1.5 text-[9px] sm:text-[10px] font-mono text-cyan-400 uppercase tracking-widest truncate">
+                <History className="w-3.5 h-3.5 shrink-0 text-cyan-400" />
+                <span className="truncate">
+                  {selectedWord.id === lastSubmittedWordId
+                    ? "★ ÚLTIMA FRASE SUBIDA ★"
+                    : "HITO HISTÓRICO TRITECH"}
+                </span>
+              </div>
+
+              {selectedWord.year ? (
+                <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[9px] sm:text-[10px] font-mono font-bold flex items-center gap-1 shrink-0">
+                  <Calendar className="w-3 h-3" />
+                  {selectedWord.year}
+                </span>
+              ) : selectedWord.id === lastSubmittedWordId ? (
+                <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-500/50 text-emerald-400 text-[9px] sm:text-[10px] font-mono font-bold shrink-0">
+                  NUEVO APORTE
+                </span>
+              ) : null}
+            </div>
+
+            <div className="text-xl sm:text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-200 to-emerald-300 uppercase tracking-wider leading-tight py-1">
+              &ldquo;{selectedWord.text}&rdquo;
+            </div>
+
+            {selectedWord.historyNote ? (
+              <p className="text-[11px] sm:text-xs text-slate-300 font-light leading-relaxed px-3 bg-slate-900/70 p-3 rounded-xl border border-slate-800/80 w-full text-left">
+                {selectedWord.historyNote}
+              </p>
+            ) : selectedWord.author ? (
+              <span className="text-[11px] sm:text-xs text-slate-400">
+                Aportado por: <strong className="text-white">{selectedWord.author}</strong> ({selectedWord.country || selectedWord.plant})
+              </span>
+            ) : null}
+
+            <div className="flex items-center gap-2 pt-2 w-full justify-center">
+              <button
+                onClick={onOpenShareModal}
+                className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white text-xs font-mono font-bold uppercase tracking-wider transition-all shadow-md shadow-blue-600/30 flex items-center justify-center gap-2"
+              >
+                <Camera className="w-4 h-4" />
+                <span>Capturar Hito</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
