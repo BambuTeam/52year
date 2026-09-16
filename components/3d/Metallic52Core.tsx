@@ -97,10 +97,12 @@ interface Metallic52CoreProps {
 export function Metallic52Core({ powerUpTimestamp, introProgress = 1 }: Metallic52CoreProps) {
   const { scene: scene52 } = useGLTF("/52year.glb");
   const { scene: sceneWankel } = useGLTF("/wankel.glb");
+  const { scene: sceneFluido } = useGLTF("/fluido.glb");
 
   const coreGroup = useRef<THREE.Group>(null);
   const emblemGroupRef = useRef<THREE.Group>(null);
   const wankelRotorRef = useRef<THREE.Group>(null);
+  const fluidoGroupRef = useRef<THREE.Group>(null);
   const ringBlueRef = useRef<THREE.Group>(null);
   const ringGoldRef = useRef<THREE.Group>(null);
   const ringCyanRef = useRef<THREE.Group>(null);
@@ -153,7 +155,36 @@ export function Metallic52Core({ powerUpTimestamp, introProgress = 1 }: Metallic
         }
       });
     }
-  }, [scene52, sceneWankel]);
+
+    if (sceneFluido) {
+      // Center & Configure Photorealistic Industrial Lubricant Oil Mesh
+      const boxF = new THREE.Box3().setFromObject(sceneFluido);
+      const centerF = boxF.getCenter(new THREE.Vector3());
+      sceneFluido.position.sub(centerF);
+
+      sceneFluido.traverse((child) => {
+        if ((child as THREE.Mesh).isMesh) {
+          const mesh = child as THREE.Mesh;
+          mesh.material = new THREE.MeshPhysicalMaterial({
+            color: new THREE.Color("#d97706"), // Deep amber-gold honey lubricant
+            emissive: new THREE.Color("#78350f"), // Deep golden inner warmth
+            emissiveIntensity: 0.25,
+            metalness: 0.1,
+            roughness: 0.08,
+            transmission: 0.85, // Translucent liquid glass finish
+            thickness: 0.8,
+            ior: 1.47, // Index of refraction for mineral oil
+            clearcoat: 1.0,
+            clearcoatRoughness: 0.1,
+            reflectivity: 0.9,
+            transparent: true,
+            opacity: 0.92,
+            depthWrite: false, // Clean depth sorting relative to core meshes
+          });
+        }
+      });
+    }
+  }, [scene52, sceneWankel, sceneFluido]);
 
   useFrame((state, delta) => {
     const t = state.clock.getElapsedTime();
@@ -225,6 +256,15 @@ export function Metallic52Core({ powerUpTimestamp, introProgress = 1 }: Metallic
       wankelRotorRef.current.rotation.y = Math.sin(t * 0.2) * 0.1;
     }
 
+    // Dynamic Kinetic Shockwave Pulse on Fluid Lubricant Splash
+    if (fluidoGroupRef.current) {
+      fluidoGroupRef.current.rotation.z = -t * 0.25;
+      fluidoGroupRef.current.rotation.y = Math.sin(t * 0.3) * 0.15;
+
+      const fluidPulse = 1.0 + Math.sin(surgeFactor * Math.PI) * 0.28;
+      fluidoGroupRef.current.scale.set(0.52 * fluidPulse, 0.52 * fluidPulse, 0.52 * fluidPulse);
+    }
+
     // Synchronized Atmospheric Point Light Radiating Dynamic Color onto Wankel Core Surfaces
     if (pointLightRef.current) {
       const introGlow = introProgress < 1 ? (1 - introProgress) * 4.5 : 0;
@@ -277,7 +317,14 @@ export function Metallic52Core({ powerUpTimestamp, introProgress = 1 }: Metallic
         </group>
       </Float>
 
-      {/* 2. Official "52" Model Emblem with Dynamic Intro Scale & Insertion */}
+      {/* 2. Official Photorealistic Industrial Lubricant Fluid Splash Mesh */}
+      <Float speed={1.1} rotationIntensity={0.12} floatIntensity={0.18}>
+        <group ref={fluidoGroupRef} scale={0.52} position={[0, 0, 0]}>
+          <primitive object={sceneFluido} />
+        </group>
+      </Float>
+
+      {/* 3. Official "52" Model Emblem with Dynamic Intro Scale & Insertion */}
       <Float speed={1.4} rotationIntensity={0.08} floatIntensity={0.25}>
         <group ref={emblemGroupRef} scale={0.58} position={[0, 0, 0.4]}>
           <primitive object={scene52} />
@@ -288,7 +335,7 @@ export function Metallic52Core({ powerUpTimestamp, introProgress = 1 }: Metallic
       <directionalLight position={[0, 2, 6]} intensity={1.8} color="#ffffff" />
       <pointLight ref={pointLightRef} position={[0, 0, 1.2]} intensity={1.0} color="#60a5fa" distance={6} />
 
-      {/* 3. Royal Blue Precision Orbital Ring */}
+      {/* 4. Royal Blue Precision Orbital Ring */}
       <group ref={ringBlueRef} rotation={[0.25, 0, 0]}>
         <mesh position={[0, 0, 0]}>
           <torusGeometry args={[2.2, 0.025, 32, 100]} />
@@ -316,7 +363,7 @@ export function Metallic52Core({ powerUpTimestamp, introProgress = 1 }: Metallic
         })}
       </group>
 
-      {/* 4. Industrial Emerald Green Orbital Ring */}
+      {/* 5. Industrial Emerald Green Orbital Ring */}
       <group ref={ringGoldRef} rotation={[-0.35, 0.2, 0]}>
         <mesh position={[0, 0, 0]}>
           <torusGeometry args={[2.8, 0.02, 32, 100]} />
@@ -344,7 +391,7 @@ export function Metallic52Core({ powerUpTimestamp, introProgress = 1 }: Metallic
         })}
       </group>
 
-      {/* 5. Platinum Silver Metallic Ring */}
+      {/* 6. Platinum Silver Metallic Ring */}
       <group ref={ringCyanRef}>
         <mesh position={[0, 0, 0]}>
           <torusGeometry args={[1.6, 0.012, 16, 80]} />
@@ -361,3 +408,4 @@ export function Metallic52Core({ powerUpTimestamp, introProgress = 1 }: Metallic
 
 useGLTF.preload("/52year.glb");
 useGLTF.preload("/wankel.glb");
+useGLTF.preload("/fluido.glb");
