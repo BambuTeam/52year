@@ -7,6 +7,7 @@ import * as THREE from "three";
 import { TritechWord } from "@/lib/wordList";
 import { Metallic52Core } from "./Metallic52Core";
 import { EnergyBeams } from "./EnergyBeams";
+import { InteractiveOilParticles } from "./InteractiveOilParticles";
 
 interface OrbitingWords3DProps {
   words: TritechWord[];
@@ -174,6 +175,9 @@ export function OrbitingWords3D({
         <Sparkles count={65} scale={28} size={1.8} speed={0.03} opacity={0.35} color="#38bdf8" />
         <Sparkles count={45} scale={20} size={1.4} speed={0.02} opacity={0.25} color="#fbbf24" />
       </group>
+
+      {/* Particle Love-inspired Interactive GPU Oil Fluid Particle Cloud */}
+      <InteractiveOilParticles powerUpTimestamp={powerUpTimestamp} count={1800} />
 
       {/* Dynamic Laser Energy Beams Inward to Core */}
       <EnergyBeams
