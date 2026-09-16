@@ -153,21 +153,14 @@ export function OrbitingWords3D({
     }
 
     if (orbitGroupRef.current) {
-      orbitGroupRef.current.rotation.y = t * 0.035 + state.pointer.x * 0.08;
-      orbitGroupRef.current.rotation.x = Math.sin(t * 0.03) * 0.05 - state.pointer.y * 0.06;
+      // Serene, smooth gravitational orbital rotation
+      orbitGroupRef.current.rotation.y = t * 0.025 + state.pointer.x * 0.05;
+      orbitGroupRef.current.rotation.x = Math.sin(t * 0.02) * 0.04 - state.pointer.y * 0.04;
     }
 
-    // Differential Parallax Starfield Rotations
+    // Ultra-Slow Parallax Background Starfield
     if (starFarRef.current) {
-      starFarRef.current.rotation.y = -t * 0.012;
-      starFarRef.current.rotation.z = Math.sin(t * 0.01) * 0.05;
-    }
-    if (starMidRef.current) {
-      starMidRef.current.rotation.y = t * 0.028;
-    }
-    if (starNearRef.current) {
-      starNearRef.current.rotation.y = -t * 0.055;
-      starNearRef.current.rotation.x = Math.cos(t * 0.02) * 0.04;
+      starFarRef.current.rotation.y = -t * 0.008;
     }
   });
 
@@ -176,20 +169,9 @@ export function OrbitingWords3D({
       {/* Central Metallic Extruded "52" Emblem Core with Power-Up Reaction */}
       <Metallic52Core powerUpTimestamp={powerUpTimestamp} introProgress={introProgress} />
 
-      {/* 1. Deep Background Starfield Layer (Slow Cyan Orbit) */}
+      {/* Serene, Minimal Deep Space Star Dust Layer (Zero Noise) */}
       <group ref={starFarRef}>
-        <Sparkles count={260} scale={28} size={4.0} speed={0.15} opacity={0.7} color="#38bdf8" />
-      </group>
-
-      {/* 2. Midground Starfield Layer (Medium Emerald Green Orbit) */}
-      <group ref={starMidRef}>
-        <Sparkles count={180} scale={20} size={3.2} speed={0.25} opacity={0.8} color="#52b788" />
-      </group>
-
-      {/* 3. Foreground Dust Starfield Layer (Fast Gold & White Dust) */}
-      <group ref={starNearRef}>
-        <Sparkles count={100} scale={14} size={2.5} speed={0.35} opacity={0.9} color="#fbbf24" />
-        <Sparkles count={60} scale={12} size={2.0} speed={0.4} opacity={0.85} color="#ffffff" />
+        <Sparkles count={60} scale={26} size={1.6} speed={0.04} opacity={0.35} color="#38bdf8" />
       </group>
 
       {/* Dynamic Laser Energy Beams Inward to Core */}
@@ -201,7 +183,7 @@ export function OrbitingWords3D({
 
       {/* Orbiting 3D Historical Word Constellation */}
       <group ref={orbitGroupRef}>
-        <Float speed={0.6} rotationIntensity={0.05} floatIntensity={0.2}>
+        <Float speed={0.5} rotationIntensity={0.03} floatIntensity={0.15}>
           {words.map((word) => (
             <WordCloudItem
               key={word.id}
