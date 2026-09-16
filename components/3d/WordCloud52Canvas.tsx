@@ -66,6 +66,27 @@ function CinematicIntroController({
   return null;
 }
 
+function SelectedWordCameraController({ hasSelectedWord }: { hasSelectedWord: boolean }) {
+  const { camera, size } = useThree();
+
+  useFrame((_, delta) => {
+    const aspect = size.width / size.height;
+    if (aspect < 1.0) {
+      // Mobile portrait safe framing when a modal is open
+      const targetY = hasSelectedWord ? 0.75 : 0;
+      const targetZ = hasSelectedWord ? 16.8 : 15.6;
+      camera.position.y = THREE.MathUtils.damp(camera.position.y, targetY, 4, delta);
+      camera.position.z = THREE.MathUtils.damp(camera.position.z, targetZ, 4, delta);
+    } else {
+      // Desktop framing
+      const targetY = hasSelectedWord ? 0.35 : 0;
+      camera.position.y = THREE.MathUtils.damp(camera.position.y, targetY, 4, delta);
+    }
+  });
+
+  return null;
+}
+
 export function WordCloud52Canvas({
   words,
   onSelectWord,
@@ -106,6 +127,9 @@ export function WordCloud52Canvas({
           onProgress={setIntroProgress}
           onComplete={() => setIntroCompleted(true)}
         />
+        {introCompleted && (
+          <SelectedWordCameraController hasSelectedWord={Boolean(selectedWordId)} />
+        )}
 
         {/* Ambient & Studio Directional Lights */}
         <ambientLight intensity={0.4} color="#0f172a" />
