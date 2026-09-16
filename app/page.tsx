@@ -29,7 +29,7 @@ export default function Home() {
           plant: p.department,
           country: p.country,
           position: p.position && Array.isArray(p.position) && p.position.length === 3 ? p.position : [7.2, 1.8, 0.5],
-          color: p.color || "#52b788",
+          color: p.color || "#fbbf24", // Golden Amber Glow for custom user messages
           isCustom: true,
         }));
 

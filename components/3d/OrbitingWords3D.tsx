@@ -82,38 +82,50 @@ function WordCloudItem({
                 : "opacity-50 hover:opacity-100 hover:scale-105"
             }`}
           >
-            {/* Last Submitted Badge Tag */}
-            {isLastSubmitted && (
-              <div className="absolute -top-5 left-0 px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/60 text-emerald-300 text-[8px] font-mono font-bold tracking-widest uppercase shadow-[0_0_10px_rgba(82,183,136,0.4)] whitespace-nowrap backdrop-blur-sm pointer-events-none">
-                ★ ÚLTIMA FRASE SUBIDA ★
+            {/* Custom User Message / Last Submitted Badge Tag */}
+            {isLastSubmitted ? (
+              <div className="absolute -top-5 left-0 px-2 py-0.5 rounded-full bg-amber-500/25 border border-amber-400/80 text-amber-300 text-[8px] font-mono font-bold tracking-widest uppercase shadow-[0_0_12px_rgba(251,191,36,0.5)] whitespace-nowrap backdrop-blur-sm pointer-events-none">
+                ★ ÚLTIMO MENSAJE SUBIDO ★
               </div>
-            )}
+            ) : word.isCustom ? (
+              <div className="absolute -top-5 left-0 px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-400/50 text-amber-300/90 text-[8px] font-mono font-semibold tracking-widest uppercase shadow-[0_0_8px_rgba(251,191,36,0.3)] whitespace-nowrap backdrop-blur-sm pointer-events-none">
+                MENSAJE
+              </div>
+            ) : null}
 
-            {/* Tiny Glowing Cyan/Emerald Point Node */}
+            {/* Tiny Glowing Point Node (Golden Amber for User Custom Messages) */}
             <span
               className={`rounded-full shrink-0 transform-gpu transition-all duration-300 ${
                 isLastSubmitted
-                  ? "w-2.5 h-2.5 bg-emerald-400 shadow-[0_0_12px_#52b788]"
+                  ? "w-2.5 h-2.5 bg-amber-400 shadow-[0_0_14px_#fbbf24]"
+                  : word.isCustom
+                  ? "w-2.5 h-2.5 bg-amber-400 shadow-[0_0_10px_#fbbf24]"
                   : isFocused
                   ? "w-2.5 h-2.5 bg-cyan-300 shadow-[0_0_14px_#38bdf8]"
                   : "w-2 h-2 bg-cyan-400 shadow-[0_0_8px_#38bdf8] group-hover:scale-125"
               }`}
               style={{
-                backgroundColor: isLastSubmitted ? "#52b788" : word.color || "#38bdf8",
-                boxShadow: isFocused
-                  ? `0 0 14px ${isLastSubmitted ? "#52b788" : word.color || "#38bdf8"}`
+                backgroundColor: isLastSubmitted || word.isCustom ? "#fbbf24" : word.color || "#38bdf8",
+                boxShadow: isFocused || isLastSubmitted || word.isCustom
+                  ? `0 0 14px ${isLastSubmitted || word.isCustom ? "#fbbf24" : word.color || "#38bdf8"}`
                   : `0 0 8px ${word.color || "#38bdf8"}80`,
               }}
             />
 
             {/* Ultra-Thin Semi-Transparent Tech Line Connector */}
-            <span className="w-4 border-t border-cyan-400/40 opacity-50 group-hover:opacity-100 group-hover:w-6 group-hover:border-cyan-400/80 transition-all shrink-0" />
+            <span
+              className={`w-4 border-t transition-all shrink-0 ${
+                word.isCustom
+                  ? "border-amber-400/60 opacity-80 group-hover:opacity-100 group-hover:w-6 group-hover:border-amber-400"
+                  : "border-cyan-400/40 opacity-50 group-hover:opacity-100 group-hover:w-6 group-hover:border-cyan-400/80"
+              }`}
+            />
 
-            {/* Clean White Sci-Fi Floating Typography */}
+            {/* Floating Typography (Gold for User Custom Messages, White/Cyan for History) */}
             <span
               className={`font-mono text-xs tracking-wider whitespace-nowrap transition-all duration-300 ${
-                isLastSubmitted
-                  ? "text-emerald-200 font-bold"
+                isLastSubmitted || word.isCustom
+                  ? "text-amber-200 font-bold text-shadow-[0_0_10px_rgba(251,191,36,0.6)]"
                   : isFocused
                   ? "text-cyan-50 font-bold text-shadow-[0_0_10px_rgba(56,189,248,0.7)]"
                   : "text-white/80 font-medium group-hover:text-white"

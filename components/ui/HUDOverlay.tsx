@@ -143,24 +143,18 @@ export function HUDOverlay({
         <div className="hud-corner-bl !border-cyan-400/70" />
         <div className="hud-corner-br !border-cyan-400/70" />
 
-        {/* Spacecraft Telemetry Status Indicator */}
-        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-950/60 border border-cyan-400/30 text-[9px] font-mono text-cyan-300 tracking-wider uppercase mr-1 shrink-0">
-          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-          COMMAND STRIP
-        </div>
-
-        {/* Primary Button: Digitar Frase / Palabra with Loading Ring Feedback */}
+        {/* Primary Button: Agregar Mensaje */}
         <button
           onClick={handleOpenAdd}
           disabled={isLoadingAdd}
-          className="flex-1 sm:flex-initial px-5 sm:px-7 py-3 sm:py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-blue-500 to-emerald-500 hover:from-blue-500 hover:to-emerald-400 text-white font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all ring-2 ring-cyan-400/40 relative overflow-hidden"
+          className="flex-1 sm:flex-initial px-5 sm:px-7 py-3 sm:py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-blue-500 to-amber-500 hover:from-blue-500 hover:to-amber-400 text-white font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all ring-2 ring-cyan-400/40 relative overflow-hidden"
         >
           {isLoadingAdd ? (
             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
           ) : (
             <PlusCircle className="w-4 h-4 text-white stroke-[2.5]" />
           )}
-          <span className="whitespace-nowrap">DIGITAR FRASE</span>
+          <span className="whitespace-nowrap">AGREGAR MENSAJE</span>
         </button>
 
         {/* Secondary Button: Share Snapshot */}

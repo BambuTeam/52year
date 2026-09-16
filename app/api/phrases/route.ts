@@ -46,7 +46,7 @@ export async function POST(request: Request) {
     const phrase = addPhrase({
       text: text.trim(),
       author: typeof author === "string" ? author : "Colaborador Tritech",
-      department: typeof department === "string" ? department : "Grupo Tritech",
+      department: typeof country === "string" ? country : department || "Guatemala",
       country: typeof country === "string" ? country : department || "Guatemala",
     });
 
